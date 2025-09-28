@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="gradStudio" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fef9f3" />
+      <stop offset="100%" stop-color="#edd3bb" />
+    </linearGradient>
+  </defs>
+  <rect width="960" height="720" fill="url(#gradStudio)" />
+  <g fill="none" stroke="#8c5a3c" stroke-width="6" opacity="0.45">
+    <rect x="160" y="160" width="640" height="360" rx="40" />
+    <rect x="200" y="200" width="560" height="280" rx="30" />
+    <path d="M240 420h480" />
+    <path d="M320 260h320" stroke-width="4" opacity="0.7" />
+  </g>
+  <text x="50%" y="82%" text-anchor="middle" font-family="'Work Sans', sans-serif" font-weight="600" font-size="42" fill="#5e3d2a">Inside the Studio</text>
+</svg>

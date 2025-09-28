@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Book an Appointment | Vida Beauty Brow Altamonte Springs</title>
+  <meta name="description" content="Reserve eyebrow shaping, lamination, lash, skincare, and permanent makeup services at Vida Beauty Brow in Altamonte Springs.">
+  <link rel="canonical" href="https://www.vidabeautybrow.com/order">
+  <link rel="preload" href="styles/main.css" as="style">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/order.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="order-page">
+  <header class="site-header">
+    <div class="container header-grid">
+      <a class="brand" href="index.html" aria-label="Vida Beauty Brow home">
+        <span class="brand__logo">Vida Beauty Brow</span>
+      </a>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="primary-navigation">
+        <span class="sr-only">Toggle navigation</span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav id="primary-navigation" class="site-nav" aria-label="Primary">
+        <ul>
+          <li><a href="index.html#services">Services</a></li>
+          <li><a href="index.html#reviews">Reviews</a></li>
+          <li><a href="index.html#contact">Contact</a></li>
+          <li><a class="cta" href="#checkout">Checkout</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="order-hero">
+      <div class="container">
+        <p class="eyebrow">Online Booking</p>
+        <h1>Reserve your Vida Beauty Brow service</h1>
+        <p>Select your desired treatments, customize add-ons, and confirm your visit in minutes. All bookings require a valid card on file. Questions? Text <a href="tel:+16894448876">(689) 444-8876</a>.</p>
+        <div class="order-tools">
+          <label class="order-tools__search" for="service-search">
+            <span class="sr-only">Search services</span>
+            <input id="service-search" type="search" placeholder="Search brows, lashes, facials..." autocomplete="off">
+          </label>
+          <div class="order-tools__filters" role="group" aria-label="Filter services">
+            <button class="filter-button is-active" data-filter="all">All</button>
+            <button class="filter-button" data-filter="brows">Brows</button>
+            <button class="filter-button" data-filter="lashes">Lashes</button>
+            <button class="filter-button" data-filter="skin">Skin</button>
+            <button class="filter-button" data-filter="pmu">PMU</button>
+          </div>
+          <label class="order-tools__sort" for="service-sort">
+            <span class="sr-only">Sort services</span>
+            <select id="service-sort">
+              <option value="default">Recommended</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+              <option value="duration">Duration</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="service-menu" aria-label="Service menu">
+      <div class="container">
+        <div class="service-group" id="brows">
+          <header class="service-group__header">
+            <h2>Brow Design &amp; Lamination</h2>
+            <p>Signature brow sculpting, tinting, lamination, and maintenance packages to define and nourish your brows.</p>
+          </header>
+          <div class="service-list">
+            <article class="service-item" data-category="brows" data-price="65" data-duration="40">
+              <div>
+                <h3>Signature Brow Shaping &amp; Tint</h3>
+                <p>Includes consultation, mapping, precise waxing/threading, and custom blended tint.</p>
+                <ul>
+                  <li>40 minutes</li>
+                  <li>Perfect for first-time clients</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">$65</span>
+                <button class="service-item__add" data-service="Signature Brow Shaping &amp; Tint">Add</button>
+              </div>
+            </article>
+            <article class="service-item" data-category="brows" data-price="95" data-duration="60">
+              <div>
+                <h3>Brow Lamination + Nourishing Keratin</h3>
+                <p>Lifts and sets brow hairs for a fuller look. Includes shaping, tint, and keratin conditioning.</p>
+                <ul>
+                  <li>60 minutes</li>
+                  <li>Results last 6–8 weeks</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">$95</span>
+                <button class="service-item__add" data-service="Brow Lamination + Nourishing Keratin">Add</button>
+              </div>
+            </article>
+            <article class="service-item" data-category="brows" data-price="120" data-duration="75">
+              <div>
+                <h3>Hybrid Brow Stain &amp; Lamination</h3>
+                <p>Hybrid dye and lamination for extra depth and definition. Includes shaping and aftercare kit.</p>
+                <ul>
+                  <li>75 minutes</li>
+                  <li>Ideal for sparse brows</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">$120</span>
+                <button class="service-item__add" data-service="Hybrid Brow Stain &amp; Lamination">Add</button>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="service-group" id="lashes">
+          <header class="service-group__header">
+            <h2>Lash Lift &amp; Extensions</h2>
+            <p>Enhance and volumize your lashes with keratin lifts or custom extension sets.</p>
+          </header>
+          <div class="service-list">
+            <article class="service-item" data-category="lashes" data-price="90" data-duration="55">
+              <div>
+                <h3>Keratin Lash Lift &amp; Tint</h3>
+                <p>Lift, curl, and tint your natural lashes with nourishing keratin for long-lasting results.</p>
+                <ul>
+                  <li>55 minutes</li>
+                  <li>Includes take-home care tips</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">$90</span>
+                <button class="service-item__add" data-service="Keratin Lash Lift &amp; Tint">Add</button>
+              </div>
+            </article>
+            <article class="service-item" data-category="lashes" data-price="150" data-duration="120">
+              <div>
+                <h3>Signature Hybrid Lash Extensions</h3>
+                <p>A blend of classic and volume fans for soft fullness. Includes consultation and styling customization.</p>
+                <ul>
+                  <li>120 minutes</li>
+                  <li>Refill recommended every 3 weeks</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">$150</span>
+                <button class="service-item__add" data-service="Signature Hybrid Lash Extensions">Add</button>
+              </div>
+            </article>
+            <article class="service-item" data-category="lashes" data-price="85" data-duration="45">
+              <div>
+                <h3>Lash Bath &amp; Extension Touch-Up</h3>
+                <p>Refresh extensions between fills with a gentle cleanse and strategic replacements.</p>
+                <ul>
+                  <li>45 minutes</li>
+                  <li>Great for events</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">$85</span>
+                <button class="service-item__add" data-service="Lash Bath &amp; Extension Touch-Up">Add</button>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="service-group" id="skin">
+          <header class="service-group__header">
+            <h2>Skin Treatments</h2>
+            <p>Glow-enhancing facials combining dermaplaning, LED, and pro-grade exfoliation to renew and hydrate.</p>
+          </header>
+          <div class="service-list">
+            <article class="service-item" data-category="skin" data-price="110" data-duration="75">
+              <div>
+                <h3>Signature Glow Facial</h3>
+                <p>Double cleanse, enzyme exfoliation, dermaplaning, targeted treatment mask, and LED therapy.</p>
+                <ul>
+                  <li>75 minutes</li>
+                  <li>Customizable for all skin types</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">$110</span>
+                <button class="service-item__add" data-service="Signature Glow Facial">Add</button>
+              </div>
+            </article>
+            <article class="service-item" data-category="skin" data-price="85" data-duration="50">
+              <div>
+                <h3>Clarifying Acne Facial</h3>
+                <p>Purifying steam, extractions, and antibacterial LED to calm active breakouts and reduce congestion.</p>
+                <ul>
+                  <li>50 minutes</li>
+                  <li>Includes soothing mask</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">$85</span>
+                <button class="service-item__add" data-service="Clarifying Acne Facial">Add</button>
+              </div>
+            </article>
+            <article class="service-item" data-category="skin" data-price="130" data-duration="90">
+              <div>
+                <h3>Glow Peel + LED Therapy</h3>
+                <p>A gentle peel paired with LED to brighten, smooth texture, and even tone.</p>
+                <ul>
+                  <li>90 minutes</li>
+                  <li>Minimal downtime</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">$130</span>
+                <button class="service-item__add" data-service="Glow Peel + LED Therapy">Add</button>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="service-group" id="pmu">
+          <header class="service-group__header">
+            <h2>Permanent Makeup</h2>
+            <p>Long-lasting brow artistry using ombré powder and nano techniques to create soft, natural definition.</p>
+          </header>
+          <div class="service-list">
+            <article class="service-item" data-category="pmu" data-price="450" data-duration="180">
+              <div>
+                <h3>Ombré Powder Brows</h3>
+                <p>Consultation, mapping, custom pigment selection, and initial session. Perfectly fades into a powdery finish.</p>
+                <ul>
+                  <li>3 hours</li>
+                  <li>Includes perfecting touch-up</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">$450</span>
+                <button class="service-item__add" data-service="Ombré Powder Brows">Add</button>
+              </div>
+            </article>
+            <article class="service-item" data-category="pmu" data-price="150" data-duration="120">
+              <div>
+                <h3>6-12 Month PMU Refresh</h3>
+                <p>Color refresh and perfecting details for existing Vida Beauty Brow PMU clients.</p>
+                <ul>
+                  <li>2 hours</li>
+                  <li>Pre-care instructions provided</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">$150</span>
+                <button class="service-item__add" data-service="6-12 Month PMU Refresh">Add</button>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cart" id="checkout" aria-labelledby="cart-heading">
+      <div class="container">
+        <div class="cart__summary">
+          <h2 id="cart-heading">Your booking</h2>
+          <p class="cart__note">Select services to build your appointment. You can adjust order before confirming.</p>
+          <ul class="cart__items" aria-live="polite"></ul>
+          <dl class="cart__totals">
+            <div>
+              <dt>Subtotal</dt>
+              <dd id="cart-subtotal">$0</dd>
+            </div>
+            <div>
+              <dt>Estimated duration</dt>
+              <dd id="cart-duration">0 min</dd>
+            </div>
+          </dl>
+          <button class="button" id="start-checkout" type="button">Proceed to checkout</button>
+          <p class="cart__disclaimer">A credit card is required to secure your appointment. Cancellations within 24 hours may incur a fee.</p>
+        </div>
+        <form class="cart__form" aria-label="Guest details">
+          <div class="form-field">
+            <label for="guest-name">Full name</label>
+            <input id="guest-name" type="text" name="name" required autocomplete="name" placeholder="Your name">
+          </div>
+          <div class="form-field">
+            <label for="guest-email">Email</label>
+            <input id="guest-email" type="email" name="email" required autocomplete="email" placeholder="you@example.com">
+          </div>
+          <div class="form-field">
+            <label for="guest-phone">Mobile phone</label>
+            <input id="guest-phone" type="tel" name="phone" required autocomplete="tel" placeholder="(689) 444-8876">
+          </div>
+          <div class="form-field">
+            <label for="preferred-date">Preferred date</label>
+            <input id="preferred-date" type="date" name="date" required>
+          </div>
+          <div class="form-field">
+            <label for="preferred-time">Preferred time</label>
+            <input id="preferred-time" type="time" name="time" required>
+          </div>
+          <div class="form-field form-field--textarea">
+            <label for="guest-notes">Notes for your artist</label>
+            <textarea id="guest-notes" name="notes" rows="4" placeholder="Allergies, goals, prior treatments..."></textarea>
+          </div>
+          <button class="button button--secondary" type="submit">Request appointment</button>
+          <p class="form-footnote">Submitting this form sends your request to Vida Beauty Brow. We will confirm details by text or email.</p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <a class="brand" href="index.html">Vida Beauty Brow</a>
+        <p>Questions about booking? Call <a href="tel:+16894448876">(689) 444-8876</a> or email <a href="mailto:hello@vidabeautybrow.com">hello@vidabeautybrow.com</a>.</p>
+      </div>
+      <nav aria-label="Footer">
+        <ul>
+          <li><a href="index.html#services">Services</a></li>
+          <li><a href="#checkout">Your booking</a></li>
+          <li><a href="index.html#contact">Directions</a></li>
+        </ul>
+      </nav>
+      <p class="footer__legal">&copy; <span id="year"></span> Vida Beauty Brow. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="scripts/main.js" defer></script>
+  <script src="scripts/order.js" defer></script>
+</body>
+</html>
