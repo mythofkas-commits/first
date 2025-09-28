@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480">
+  <defs>
+    <linearGradient id="gradOmbre" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fdeee4" />
+      <stop offset="100%" stop-color="#e8c0a2" />
+    </linearGradient>
+  </defs>
+  <rect width="640" height="480" fill="url(#gradOmbre)" />
+  <g fill="none" stroke-linecap="round">
+    <path d="M120 220c60-70 140-110 220-108 96 2 164 40 220 128" stroke="#5e3d2a" stroke-width="10" />
+    <path d="M120 260c60-60 140-90 220-88 96 4 164 36 220 108" stroke="#8c5a3c" stroke-width="8" opacity="0.7" />
+    <path d="M120 300c60-52 140-72 220-70 96 4 164 28 220 88" stroke="#b17f5c" stroke-width="6" opacity="0.5" />
+  </g>
+  <text x="50%" y="82%" text-anchor="middle" font-family="'Work Sans', sans-serif" font-size="32" font-weight="600" fill="#5e3d2a">Ombré Powder Brows</text>
+</svg>

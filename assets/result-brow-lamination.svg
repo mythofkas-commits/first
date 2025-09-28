@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480">
+  <defs>
+    <linearGradient id="gradBrow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff7ef" />
+      <stop offset="100%" stop-color="#f1d1b6" />
+    </linearGradient>
+  </defs>
+  <rect width="640" height="480" fill="url(#gradBrow)" />
+  <path d="M120 240c40-64 128-112 220-108 72 3 116 33 180 102" fill="none" stroke="#5e3d2a" stroke-width="10" stroke-linecap="round" />
+  <path d="M120 280c40-48 128-80 220-78 72 2 116 25 180 74" fill="none" stroke="#8c5a3c" stroke-width="8" stroke-linecap="round" opacity="0.7" />
+  <text x="50%" y="82%" text-anchor="middle" font-family="'Work Sans', sans-serif" font-size="32" font-weight="600" fill="#5e3d2a">Brow Lamination</text>
+</svg>

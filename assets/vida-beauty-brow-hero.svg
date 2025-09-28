@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff5ec" />
+      <stop offset="100%" stop-color="#d7b89b" />
+    </linearGradient>
+  </defs>
+  <rect width="960" height="720" fill="url(#grad)" />
+  <g fill="#5e3d2a" opacity="0.65">
+    <path d="M180 480c120-160 240-240 420-260 120-12 180 44 240 104l-28 40c-52-48-104-92-208-84-152 12-264 136-360 248z"/>
+    <path d="M120 300c80-140 220-230 376-244 124-10 212 40 320 140l-36 44c-96-88-178-124-280-116-140 12-248 96-324 212z" opacity="0.4"/>
+  </g>
+  <text x="50%" y="84%" text-anchor="middle" font-family="'Playfair Display', serif" font-size="62" fill="#5e3d2a">Vida Beauty Brow</text>
+</svg>

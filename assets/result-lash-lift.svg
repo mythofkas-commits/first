@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480">
+  <defs>
+    <linearGradient id="gradLash" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fef9ff" />
+      <stop offset="100%" stop-color="#e8d6ff" />
+    </linearGradient>
+  </defs>
+  <rect width="640" height="480" fill="url(#gradLash)" />
+  <path d="M100 310c90-110 160-150 260-150 84 0 146 30 220 120" fill="none" stroke="#4a2f6f" stroke-width="12" stroke-linecap="round" opacity="0.75" />
+  <path d="M120 330c72-76 150-110 240-110 64 0 124 20 188 86" fill="none" stroke="#8c5a3c" stroke-width="8" stroke-linecap="round" opacity="0.8" />
+  <text x="50%" y="80%" text-anchor="middle" font-family="'Work Sans', sans-serif" font-size="32" font-weight="600" fill="#4a2f6f">Keratin Lash Lift</text>
+</svg>
