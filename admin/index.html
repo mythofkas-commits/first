@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vida Beauty Brow Admin Panel</title>
+  <link rel="stylesheet" href="../styles/admin.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="admin-header">
+    <div class="admin-container">
+      <h1>Vida Beauty Brow Admin Panel</h1>
+      <p class="admin-subtitle">Update your site content, services, pages, and visual design in real-time.</p>
+    </div>
+  </header>
+  <main class="admin-main admin-container">
+    <section class="admin-card" aria-labelledby="auth-heading">
+      <div class="admin-card__header">
+        <h2 id="auth-heading">Administrator Access</h2>
+        <p>Changes require the admin token configured on the server. The token is stored locally for convenience.</p>
+      </div>
+      <div class="admin-grid">
+        <label class="admin-field">
+          <span>Admin token</span>
+          <input type="password" id="admin-token" autocomplete="off" placeholder="Enter admin token">
+        </label>
+        <button id="save-token" class="admin-button">Save token</button>
+        <p id="token-status" class="admin-status" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section class="admin-card" aria-labelledby="design-heading">
+      <div class="admin-card__header">
+        <h2 id="design-heading">Brand &amp; Design</h2>
+        <p>Edit the primary identity and theme colors that power the public website.</p>
+      </div>
+      <div class="admin-grid admin-grid--two">
+        <label class="admin-field">
+          <span>Brand name</span>
+          <input type="text" data-path="site.brand.logoText" placeholder="Vida Beauty Brow">
+        </label>
+        <label class="admin-field">
+          <span>Tagline</span>
+          <input type="text" data-path="site.tagline" placeholder="Brow &amp; Beauty Studio in Altamonte Springs">
+        </label>
+        <label class="admin-field">
+          <span>Primary color</span>
+          <input type="color" data-path="design.colors.primary">
+        </label>
+        <label class="admin-field">
+          <span>Primary accent</span>
+          <input type="color" data-path="design.colors.accent">
+        </label>
+        <label class="admin-field">
+          <span>Surface color</span>
+          <input type="color" data-path="design.colors.surface">
+        </label>
+        <label class="admin-field">
+          <span>Background color</span>
+          <input type="color" data-path="design.colors.background">
+        </label>
+        <label class="admin-field">
+          <span>Text color</span>
+          <input type="color" data-path="design.colors.text">
+        </label>
+        <label class="admin-field">
+          <span>Muted text color</span>
+          <input type="color" data-path="design.colors.muted">
+        </label>
+        <label class="admin-field">
+          <span>Heading font stack</span>
+          <input type="text" data-path="design.fonts.heading" placeholder="'Playfair Display', serif">
+        </label>
+        <label class="admin-field">
+          <span>Body font stack</span>
+          <input type="text" data-path="design.fonts.body" placeholder="'Work Sans', sans-serif">
+        </label>
+        <label class="admin-field admin-field--wide">
+          <span>Custom CSS (optional)</span>
+          <textarea data-path="design.customCss" rows="4" placeholder=":root { --color-primary: #000; }"></textarea>
+        </label>
+      </div>
+      <div class="admin-preview" id="design-preview" aria-live="polite"></div>
+    </section>
+
+    <section class="admin-card" aria-labelledby="homepage-heading">
+      <div class="admin-card__header">
+        <h2 id="homepage-heading">Homepage content</h2>
+        <p>Update hero messaging, services, and other copy shown on the main site.</p>
+      </div>
+      <div class="admin-grid admin-grid--two">
+        <label class="admin-field admin-field--wide">
+          <span>Hero eyebrow</span>
+          <input type="text" data-path="homepage.hero.eyebrow">
+        </label>
+        <label class="admin-field admin-field--wide">
+          <span>Hero headline</span>
+          <input type="text" data-path="homepage.hero.title">
+        </label>
+        <label class="admin-field admin-field--wide">
+          <span>Hero description</span>
+          <textarea data-path="homepage.hero.description" rows="3"></textarea>
+        </label>
+        <label class="admin-field">
+          <span>Hero image URL</span>
+          <input type="text" data-path="homepage.hero.image.src">
+        </label>
+        <label class="admin-field">
+          <span>Hero image alt text</span>
+          <input type="text" data-path="homepage.hero.image.alt">
+        </label>
+        <label class="admin-field">
+          <span>Primary CTA label</span>
+          <input type="text" data-path="homepage.hero.primaryCta.label">
+        </label>
+        <label class="admin-field">
+          <span>Primary CTA link</span>
+          <input type="text" data-path="homepage.hero.primaryCta.href">
+        </label>
+        <label class="admin-field">
+          <span>Secondary CTA label</span>
+          <input type="text" data-path="homepage.hero.secondaryCta.label">
+        </label>
+        <label class="admin-field">
+          <span>Secondary CTA link</span>
+          <input type="text" data-path="homepage.hero.secondaryCta.href">
+        </label>
+        <label class="admin-field admin-field--wide">
+          <span>Badges (JSON array)</span>
+          <textarea data-path="homepage.badges" data-json rows="4" placeholder='[{"title":"","description":""}]'></textarea>
+        </label>
+        <label class="admin-field admin-field--wide">
+          <span>Service cards (JSON array)</span>
+          <textarea data-path="homepage.services.cards" data-json rows="6" placeholder='[{"title":"","description":"","items":[],"cta":{"label":"","href":""}}]'></textarea>
+        </label>
+        <label class="admin-field admin-field--wide">
+          <span>Results gallery (JSON array)</span>
+          <textarea data-path="homepage.results.gallery" data-json rows="4" placeholder='[{"image":"","alt":"","caption":""}]'></textarea>
+        </label>
+        <label class="admin-field admin-field--wide">
+          <span>Testimonials (JSON array)</span>
+          <textarea data-path="homepage.reviews.testimonials" data-json rows="4" placeholder='[{"quote":"","author":""}]'></textarea>
+        </label>
+      </div>
+    </section>
+
+    <section class="admin-card" aria-labelledby="order-heading">
+      <div class="admin-card__header">
+        <h2 id="order-heading">Booking &amp; services</h2>
+        <p>Control the order page hero and the complete service menu structure.</p>
+      </div>
+      <div class="admin-grid admin-grid--two">
+        <label class="admin-field admin-field--wide">
+          <span>Order hero eyebrow</span>
+          <input type="text" data-path="orderPage.hero.eyebrow">
+        </label>
+        <label class="admin-field admin-field--wide">
+          <span>Order hero headline</span>
+          <input type="text" data-path="orderPage.hero.title">
+        </label>
+        <label class="admin-field admin-field--wide">
+          <span>Order hero description</span>
+          <textarea data-path="orderPage.hero.description" rows="3"></textarea>
+        </label>
+        <label class="admin-field">
+          <span>Order hours</span>
+          <input type="text" data-path="orderPage.hero.hours">
+        </label>
+        <label class="admin-field">
+          <span>Checkout CTA label</span>
+          <input type="text" data-path="orderPage.checkout.cta">
+        </label>
+        <label class="admin-field admin-field--wide">
+          <span>Checkout instructions</span>
+          <textarea data-path="orderPage.checkout.instructions" rows="3"></textarea>
+        </label>
+        <label class="admin-field admin-field--wide">
+          <span>Service filters (JSON array)</span>
+          <textarea data-path="orderPage.filters" data-json rows="4" placeholder='[{"label":"All","value":"all"}]'></textarea>
+        </label>
+        <label class="admin-field admin-field--wide">
+          <span>Service menu (JSON array)</span>
+          <textarea data-path="orderPage.serviceMenu" data-json rows="8" placeholder='[{"id":"","title":"","description":"","services":[{"name":"","description":"","price":0,"duration":0,"categories":[]}]}]'></textarea>
+        </label>
+        <label class="admin-field admin-field--wide">
+          <span>Order footer note (HTML allowed)</span>
+          <textarea data-path="orderPage.footer.note" rows="3"></textarea>
+        </label>
+      </div>
+    </section>
+
+    <section class="admin-card" aria-labelledby="pages-heading">
+      <div class="admin-card__header">
+        <h2 id="pages-heading">Additional pages</h2>
+        <p>Create or edit fully custom pages served at <code>/pages/&lt;slug&gt;</code>. Content supports HTML.</p>
+      </div>
+      <label class="admin-field admin-field--wide">
+        <span>Pages (JSON array)</span>
+        <textarea data-path="pages" data-json rows="8" placeholder='[{"id":"","title":"","slug":"","hero":{"title":""},"sections":[{"type":"content","title":"","body":"<p>Content</p>"}]}]'></textarea>
+      </label>
+    </section>
+
+    <section class="admin-card" aria-labelledby="json-heading">
+      <div class="admin-card__header">
+        <h2 id="json-heading">Advanced JSON editor</h2>
+        <p>Edit the entire configuration directly. Formatting tools help keep the JSON valid.</p>
+      </div>
+      <textarea id="json-editor" rows="20" spellcheck="false"></textarea>
+      <div class="admin-actions">
+        <button class="admin-button admin-button--ghost" id="format-json">Format JSON</button>
+        <button class="admin-button admin-button--ghost" id="reset-json">Reset</button>
+        <button class="admin-button" id="save-json">Save changes</button>
+      </div>
+      <p id="json-status" class="admin-status" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <footer class="admin-footer">
+    <div class="admin-container">
+      <p>Need help? Update <code>data/site.json</code> manually or restart the server after significant changes.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

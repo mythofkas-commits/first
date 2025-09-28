@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Book an Appointment | Vida Beauty Brow Altamonte Springs</title>
-  <meta name="description" content="Reserve eyebrow shaping, lamination, lash, skincare, and permanent makeup services at Vida Beauty Brow in Altamonte Springs.">
-  <link rel="canonical" href="https://www.vidabeautybrow.com/order">
+  <meta name="description" data-meta="description" content="Reserve eyebrow shaping, lamination, lash, skincare, and permanent makeup services at Vida Beauty Brow in Altamonte Springs.">
+  <link rel="canonical" data-meta="canonical" href="https://www.vidabeautybrow.com/order">
   <link rel="preload" href="styles/main.css" as="style">
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/order.css">
@@ -17,7 +17,7 @@
   <header class="site-header">
     <div class="container header-grid">
       <a class="brand" href="index.html" aria-label="Vida Beauty Brow home">
-        <span class="brand__logo">Vida Beauty Brow</span>
+        <span class="brand__logo" data-content="brand.logo">Vida Beauty Brow</span>
       </a>
       <button class="nav-toggle" aria-expanded="false" aria-controls="primary-navigation">
         <span class="sr-only">Toggle navigation</span>
@@ -26,7 +26,7 @@
         <span></span>
       </button>
       <nav id="primary-navigation" class="site-nav" aria-label="Primary">
-        <ul>
+        <ul data-navigation>
           <li><a href="index.html#services">Services</a></li>
           <li><a href="index.html#reviews">Reviews</a></li>
           <li><a href="index.html#contact">Contact</a></li>
@@ -39,16 +39,16 @@
   <main>
     <section class="order-hero">
       <div class="container">
-        <p class="eyebrow">Online Booking</p>
-        <h1>Reserve your Vida Beauty Brow service</h1>
-        <p>Build your service menu, reserve your preferred time, and submit your appointment request without leaving our site. Questions? Text <a href="tel:+16894448876">(689) 444-8876</a>.</p>
-        <p class="order-hours">Studio hours: Monday – Saturday, 10:30am – 6:00pm (Closed Sunday).</p>
+        <p class="eyebrow" data-content="order.hero.eyebrow">Online Booking</p>
+        <h1 data-content="order.hero.title">Reserve your Vida Beauty Brow service</h1>
+        <p data-content="order.hero.description">Build your service menu, reserve your preferred time, and submit your appointment request without leaving our site. Questions? Text <a href="tel:+16894448876">(689) 444-8876</a>.</p>
+        <p class="order-hours" data-content="order.hero.hours">Studio hours: Monday – Saturday, 10:30am – 6:00pm (Closed Sunday).</p>
         <div class="order-tools">
           <label class="order-tools__search" for="service-search">
             <span class="sr-only">Search services</span>
             <input id="service-search" type="search" placeholder="Search brows, waxing, microderm..." autocomplete="off">
           </label>
-          <div class="order-tools__filters" role="group" aria-label="Filter services">
+          <div class="order-tools__filters" role="group" aria-label="Filter services" data-list="order.filters">
             <button class="filter-button is-active" data-filter="all">All</button>
             <button class="filter-button" data-filter="featured">Featured</button>
             <button class="filter-button" data-filter="brows">Brows &amp; Lashes</button>
@@ -71,8 +71,8 @@
     </section>
 
     <section class="service-menu" aria-label="Service menu">
-      <div class="container">
-        <div class="service-group" id="featured">
+      <div class="container" data-list="order.serviceMenu">
+        <div class="service-group">
           <header class="service-group__header">
             <h2>Featured services</h2>
             <p>Fan-favorite appointments that showcase our signature blend of artistry, skin expertise, and relaxation.</p>
@@ -92,192 +92,6 @@
                 <button class="service-item__add" data-service="Radiance Microdermabrasion Facial">Add</button>
               </div>
             </article>
-            <article class="service-item" data-category="featured henna brows" data-price="55" data-duration="45">
-              <div>
-                <h3>Henna Brow Design</h3>
-                <p>Precise mapping, brow cleanse, natural henna stain, and nourishing oil treatment for a soft powdery finish.</p>
-                <ul>
-                  <li>45 minutes</li>
-                  <li>Custom-blended henna pigments</li>
-                </ul>
-              </div>
-              <div class="service-item__meta">
-                <span class="service-item__price">$55</span>
-                <button class="service-item__add" data-service="Henna Brow Design">Add</button>
-              </div>
-            </article>
-            <article class="service-item" data-category="featured pmu" data-price="75" data-duration="50">
-              <div>
-                <h3>Permanent Makeup Consultation</h3>
-                <p>Comprehensive mapping session to plan ombré brows, eyeliner, or lip blush. Deposit applies to your PMU appointment.</p>
-                <ul>
-                  <li>50 minutes</li>
-                  <li>Includes custom design sketch</li>
-                </ul>
-              </div>
-              <div class="service-item__meta">
-                <span class="service-item__price">$75</span>
-                <button class="service-item__add" data-service="Permanent Makeup Consultation">Add</button>
-              </div>
-            </article>
-          </div>
-        </div>
-
-        <div class="service-group" id="brows">
-          <header class="service-group__header">
-            <h2>Eyebrows &amp; eyelashes</h2>
-            <p>Express detailing that keeps your brows and lashes polished between full appointments.</p>
-          </header>
-          <div class="service-list">
-            <article class="service-item" data-category="brows wax" data-price="18" data-duration="10">
-              <div>
-                <h3>Eyebrow Wax</h3>
-                <p>Brows shaped with gentle wax and precision finishing for clean arches.</p>
-                <ul>
-                  <li>10 minutes</li>
-                  <li>Includes soothing post-wax serum</li>
-                </ul>
-              </div>
-              <div class="service-item__meta">
-                <span class="service-item__price">$18</span>
-                <button class="service-item__add" data-service="Eyebrow Wax">Add</button>
-              </div>
-            </article>
-            <article class="service-item" data-category="brows" data-price="18" data-duration="10">
-              <div>
-                <h3>Eyebrow Threading</h3>
-                <p>Threadwork for crisp lines and a softly lifted brow shape tailored to your features.</p>
-                <ul>
-                  <li>10 minutes</li>
-                  <li>Great for sensitive skin</li>
-                </ul>
-              </div>
-              <div class="service-item__meta">
-                <span class="service-item__price">$18</span>
-                <button class="service-item__add" data-service="Eyebrow Threading">Add</button>
-              </div>
-            </article>
-            <article class="service-item" data-category="brows" data-price="20" data-duration="10">
-              <div>
-                <h3>Brow Tint</h3>
-                <p>Custom-mixed brow tint to enhance shape and fill soft gaps for up to two weeks.</p>
-                <ul>
-                  <li>10 minutes</li>
-                  <li>Add on to wax or threading</li>
-                </ul>
-              </div>
-              <div class="service-item__meta">
-                <span class="service-item__price">$20</span>
-                <button class="service-item__add" data-service="Brow Tint">Add</button>
-              </div>
-            </article>
-          </div>
-        </div>
-
-        <div class="service-group" id="wax">
-          <header class="service-group__header">
-            <h2>Wax</h2>
-            <p>Body waxing performed with care to leave skin smooth, soft, and ready for whatever you have planned.</p>
-          </header>
-          <div class="service-list">
-            <article class="service-item" data-category="wax" data-price="10" data-duration="5">
-              <div>
-                <h3>Under Lip</h3>
-                <p>Quick under-lip wax to remove stray hairs. Perfect finishing touch to any brow service.</p>
-                <ul>
-                  <li>5 minutes</li>
-                  <li>From $10</li>
-                </ul>
-              </div>
-              <div class="service-item__meta">
-                <span class="service-item__price">from $10</span>
-                <button class="service-item__add" data-service="Under Lip Wax">Add</button>
-              </div>
-            </article>
-            <article class="service-item" data-category="wax" data-price="30" data-duration="20">
-              <div>
-                <h3>Half Arm Wax</h3>
-                <p>From shoulder to elbow or elbow to wrist using gentle wax for long-lasting smoothness.</p>
-                <ul>
-                  <li>20 minutes</li>
-                  <li>$30</li>
-                </ul>
-              </div>
-              <div class="service-item__meta">
-                <span class="service-item__price">$30</span>
-                <button class="service-item__add" data-service="Half Arm Wax">Add</button>
-              </div>
-            </article>
-            <article class="service-item" data-category="wax" data-price="45" data-duration="25">
-              <div>
-                <h3>Full Arm Wax</h3>
-                <p>Complete arm wax leaving skin soft from shoulder to fingertips.</p>
-                <ul>
-                  <li>25 minutes</li>
-                  <li>$45</li>
-                </ul>
-              </div>
-              <div class="service-item__meta">
-                <span class="service-item__price">$45</span>
-                <button class="service-item__add" data-service="Full Arm Wax">Add</button>
-              </div>
-            </article>
-            <article class="service-item" data-category="wax" data-price="30" data-duration="20">
-              <div>
-                <h3>Bikini Line Wax</h3>
-                <p>Clean up the bikini line with precision waxing and post-care soothing gel.</p>
-                <ul>
-                  <li>20 minutes</li>
-                  <li>$30</li>
-                </ul>
-              </div>
-              <div class="service-item__meta">
-                <span class="service-item__price">$30</span>
-                <button class="service-item__add" data-service="Bikini Line Wax">Add</button>
-              </div>
-            </article>
-            <article class="service-item" data-category="wax" data-price="45" data-duration="30">
-              <div>
-                <h3>Half Leg Wax</h3>
-                <p>Choose upper or lower legs; includes knee detailing and calming moisturizer.</p>
-                <ul>
-                  <li>30 minutes</li>
-                  <li>$45</li>
-                </ul>
-              </div>
-              <div class="service-item__meta">
-                <span class="service-item__price">$45</span>
-                <button class="service-item__add" data-service="Half Leg Wax">Add</button>
-              </div>
-            </article>
-            <article class="service-item" data-category="wax" data-price="80" data-duration="60">
-              <div>
-                <h3>Full Leg Wax</h3>
-                <p>Full leg wax from thigh to ankle with gentle technique for minimal irritation.</p>
-                <ul>
-                  <li>60 minutes</li>
-                  <li>$80</li>
-                </ul>
-              </div>
-              <div class="service-item__meta">
-                <span class="service-item__price">$80</span>
-                <button class="service-item__add" data-service="Full Leg Wax">Add</button>
-              </div>
-            </article>
-            <article class="service-item" data-category="wax" data-price="28" data-duration="25">
-              <div>
-                <h3>Underarm Wax</h3>
-                <p>Underarm hair removal finished with cool compress and calming oil.</p>
-                <ul>
-                  <li>25 minutes</li>
-                  <li>$28</li>
-                </ul>
-              </div>
-              <div class="service-item__meta">
-                <span class="service-item__price">$28</span>
-                <button class="service-item__add" data-service="Underarm Wax">Add</button>
-              </div>
-            </article>
           </div>
         </div>
       </div>
@@ -287,7 +101,7 @@
       <div class="container">
         <div class="cart__summary">
           <h2 id="cart-heading">Your booking</h2>
-          <p class="cart__note">Select services to build your appointment request. You can review or remove items before submitting.</p>
+          <p class="cart__note" data-content="order.checkout.instructions">Select services to build your appointment request. You can review or remove items before submitting.</p>
           <ul class="cart__items" aria-live="polite"></ul>
           <dl class="cart__totals">
             <div>
@@ -299,7 +113,7 @@
               <dd id="cart-duration">0 min</dd>
             </div>
           </dl>
-          <button class="button" id="start-checkout" type="button">Proceed to checkout</button>
+          <button class="button" id="start-checkout" type="button" data-content="order.checkout.cta">Proceed to checkout</button>
           <p class="cart__disclaimer">Requests are reviewed during business hours. We’ll reach out to confirm, secure a card on file, and answer any questions.</p>
         </div>
         <form class="cart__form" aria-label="Guest details">
@@ -337,11 +151,11 @@
   <footer class="site-footer">
     <div class="container footer-grid">
       <div>
-        <a class="brand" href="index.html">Vida Beauty Brow</a>
-        <p>Questions about booking? Call <a href="tel:+16894448876">(689) 444-8876</a> or email <a href="mailto:hello@vidabeautybrow.com">hello@vidabeautybrow.com</a>.</p>
+        <a class="brand" href="index.html" data-content="brand.logo">Vida Beauty Brow</a>
+        <p data-content="order.footer.note">Questions about booking? Call <a href="tel:+16894448876">(689) 444-8876</a> or email <a href="mailto:hello@vidabeautybrow.com">hello@vidabeautybrow.com</a>.</p>
       </div>
       <nav aria-label="Footer">
-        <ul>
+        <ul data-footer-navigation>
           <li><a href="index.html#services">Services</a></li>
           <li><a href="#checkout">Your booking</a></li>
           <li><a href="index.html#contact">Directions</a></li>
@@ -351,6 +165,7 @@
     </div>
   </footer>
 
+  <script src="scripts/content.js" defer></script>
   <script src="scripts/main.js" defer></script>
   <script src="scripts/order.js" defer></script>
 </body>
