@@ -1,20 +1,69 @@
-const serviceSearch = document.querySelector('#service-search');
-const filterButtons = document.querySelectorAll('.filter-button');
-const sortSelect = document.querySelector('#service-sort');
-const serviceItems = Array.from(document.querySelectorAll('.service-item'));
-const serviceLists = document.querySelectorAll('.service-list');
-const cartList = document.querySelector('.cart__items');
-const subtotalEl = document.querySelector('#cart-subtotal');
-const durationEl = document.querySelector('#cart-duration');
-const startCheckout = document.querySelector('#start-checkout');
-const cartForm = document.querySelector('.cart__form');
-
 const cart = [];
 const currencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
   maximumFractionDigits: 0,
 });
+
+let serviceSearch;
+let sortSelect;
+let cartList;
+let subtotalEl;
+let durationEl;
+let startCheckout;
+let cartForm;
+let filterButtons = [];
+let serviceItems = [];
+let serviceLists = [];
+let defaultOrder = new Map();
+let initialized = false;
+
+function initDomReferences() {
+  serviceSearch = document.querySelector('#service-search');
+  sortSelect = document.querySelector('#service-sort');
+  cartList = document.querySelector('.cart__items');
+  subtotalEl = document.querySelector('#cart-subtotal');
+  durationEl = document.querySelector('#cart-duration');
+  startCheckout = document.querySelector('#start-checkout');
+  cartForm = document.querySelector('.cart__form');
+}
+
+function refreshCollections() {
+  filterButtons = Array.from(document.querySelectorAll('.filter-button'));
+  serviceItems = Array.from(document.querySelectorAll('.service-item'));
+  serviceLists = Array.from(document.querySelectorAll('.service-list'));
+  defaultOrder = new Map(serviceItems.map((item, index) => [item, index]));
+}
+
+function handleFilterClick(event) {
+  const button = event.currentTarget;
+  filterButtons.forEach((btn) => btn.classList.remove('is-active'));
+  button.classList.add('is-active');
+  filterServices();
+}
+
+function attachFilterListeners() {
+  filterButtons.forEach((button) => {
+    if (button.dataset.listenerAttached) return;
+    button.dataset.listenerAttached = 'true';
+    button.addEventListener('click', handleFilterClick);
+  });
+}
+
+function handleServiceListClick(event) {
+  const target = event.target;
+  if (target.matches('.service-item__add')) {
+    addToCart(target);
+  }
+}
+
+function attachServiceListListeners() {
+  serviceLists.forEach((list) => {
+    if (list.dataset.listenerAttached) return;
+    list.dataset.listenerAttached = 'true';
+    list.addEventListener('click', handleServiceListClick);
+  });
+}
 
 function normalize(text) {
   return text.toLowerCase().trim();
@@ -42,7 +91,7 @@ function sortServices(criteria) {
     'price-low': (a, b) => Number(a.dataset.price) - Number(b.dataset.price),
     'price-high': (a, b) => Number(b.dataset.price) - Number(a.dataset.price),
     duration: (a, b) => Number(a.dataset.duration) - Number(b.dataset.duration),
-    default: (a, b) => serviceItems.indexOf(a) - serviceItems.indexOf(b),
+    default: (a, b) => (defaultOrder.get(a) || 0) - (defaultOrder.get(b) || 0),
   };
 
   const compare = compareFns[criteria] || compareFns.default;
@@ -55,6 +104,7 @@ function sortServices(criteria) {
 }
 
 function updateCart() {
+  if (!cartList) return;
   cartList.innerHTML = '';
   if (!cart.length) {
     const emptyState = document.createElement('li');
@@ -79,8 +129,12 @@ function updateCart() {
   const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
   const totalDuration = cart.reduce((sum, item) => sum + item.duration, 0);
 
-  subtotalEl.textContent = currencyFormatter.format(subtotal);
-  durationEl.textContent = `${totalDuration} min`;
+  if (subtotalEl) {
+    subtotalEl.textContent = currencyFormatter.format(subtotal);
+  }
+  if (durationEl) {
+    durationEl.textContent = `${totalDuration} min`;
+  }
 }
 
 function addToCart(button) {
@@ -111,54 +165,151 @@ function removeFromCart(index) {
   updateCart();
 }
 
-serviceLists.forEach((list) => {
-  list.addEventListener('click', (event) => {
-    const target = event.target;
-    if (target.matches('.service-item__add')) {
-      addToCart(target);
+function buildFilters(filters = []) {
+  const containers = document.querySelectorAll('[data-list="order.filters"]');
+  if (!containers.length) return;
+  const list = Array.isArray(filters) && filters.length ? filters : null;
+  containers.forEach((container) => {
+    if (!list) {
+      container.querySelectorAll('.filter-button').forEach((button, index) => {
+        if (index === 0) {
+          button.classList.add('is-active');
+        }
+      });
+      return;
     }
+    container.innerHTML = '';
+    list.forEach((filter, index) => {
+      const button = document.createElement('button');
+      button.className = `filter-button${index === 0 ? ' is-active' : ''}`;
+      button.dataset.filter = filter.value || 'all';
+      button.textContent = filter.label || '';
+      container.appendChild(button);
+    });
   });
-});
+}
 
-cartList?.addEventListener('click', (event) => {
-  const target = event.target;
-  if (target.matches('.cart__remove')) {
-    const index = Number(target.dataset.index);
-    removeFromCart(index);
-  }
-});
-
-serviceSearch?.addEventListener('input', filterServices);
-
-filterButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    filterButtons.forEach((btn) => btn.classList.remove('is-active'));
-    button.classList.add('is-active');
-    filterServices();
+function buildServiceMenu(groups = []) {
+  const containers = document.querySelectorAll('[data-list="order.serviceMenu"]');
+  if (!containers.length) return;
+  const list = Array.isArray(groups) && groups.length ? groups : null;
+  containers.forEach((container) => {
+    if (!list) return;
+    container.innerHTML = '';
+    list.forEach((group) => {
+      const section = document.createElement('div');
+      section.className = 'service-group';
+      if (group.id) section.id = group.id;
+      const header = document.createElement('header');
+      header.className = 'service-group__header';
+      header.innerHTML = `
+        <h2>${escapeHtml(group.title)}</h2>
+        <p>${escapeHtml(group.description || '')}</p>
+      `;
+      section.appendChild(header);
+      const listEl = document.createElement('div');
+      listEl.className = 'service-list';
+      (group.services || []).forEach((service) => {
+        const article = document.createElement('article');
+        article.className = 'service-item';
+        const categories = Array.isArray(service.categories) ? service.categories.join(' ') : '';
+        article.dataset.category = categories;
+        article.dataset.price = Number(service.price) || 0;
+        article.dataset.duration = Number(service.duration) || 0;
+        const details = Array.isArray(service.details)
+          ? service.details.map((item) => `<li>${escapeHtml(item)}</li>`).join('')
+          : '';
+        article.innerHTML = `
+          <div>
+            <h3>${escapeHtml(service.name)}</h3>
+            <p>${escapeHtml(service.description || '')}</p>
+            ${details ? `<ul>${details}</ul>` : ''}
+          </div>
+          <div class="service-item__meta">
+            <span class="service-item__price">${currencyFormatter.format(Number(service.price) || 0)}</span>
+            <button class="service-item__add" data-service="${escapeAttribute(service.name)}">Add</button>
+          </div>
+        `;
+        listEl.appendChild(article);
+      });
+      section.appendChild(listEl);
+      container.appendChild(section);
+    });
   });
-});
+}
 
-sortSelect?.addEventListener('change', () => {
-  sortServices(sortSelect.value);
-});
+function escapeHtml(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
-startCheckout?.addEventListener('click', () => {
-  cartForm?.scrollIntoView({ behavior: 'smooth' });
-  cartForm?.querySelector('input, textarea')?.focus({ preventScroll: true });
-});
+function escapeAttribute(value = '') {
+  return escapeHtml(value).replace(/`/g, '&#96;');
+}
 
-cartForm?.addEventListener('submit', (event) => {
-  event.preventDefault();
-  if (!cart.length) {
-    alert('Please add at least one service before submitting your request.');
-    return;
+function initializeOrderPage(content) {
+  if (!initialized) {
+    initDomReferences();
+    if (!cartList) return;
+
+    cartList.addEventListener('click', (event) => {
+      const target = event.target;
+      if (target.matches('.cart__remove')) {
+        const index = Number(target.dataset.index);
+        removeFromCart(index);
+      }
+    });
+
+    serviceSearch?.addEventListener('input', filterServices);
+
+    sortSelect?.addEventListener('change', () => {
+      sortServices(sortSelect.value);
+    });
+
+    startCheckout?.addEventListener('click', () => {
+      cartForm?.scrollIntoView({ behavior: 'smooth' });
+      cartForm?.querySelector('input, textarea')?.focus({ preventScroll: true });
+    });
+
+    cartForm?.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!cart.length) {
+        alert('Please add at least one service before submitting your request.');
+        return;
+      }
+      const message = window.__SITE_CONTENT__?.orderPage?.checkout?.submitMessage
+        || 'Thank you! Your appointment request has been sent. We will reach out shortly.';
+      alert(message);
+      cart.splice(0, cart.length);
+      cartForm.reset();
+      updateCart();
+    });
+
+    initialized = true;
   }
 
-  alert('Thank you! Your appointment request has been sent. We will reach out shortly.');
-  cart.splice(0, cart.length);
-  cartForm.reset();
+  if (content?.orderPage) {
+    buildFilters(content.orderPage.filters);
+    buildServiceMenu(content.orderPage.serviceMenu);
+  }
+
+  refreshCollections();
+  attachFilterListeners();
+  attachServiceListListeners();
+  filterServices();
   updateCart();
-});
+}
 
-filterServices();
-updateCart();
+if (document.body && document.body.classList.contains('order-page')) {
+  const immediateContent = window.__SITE_CONTENT__;
+  if (immediateContent) {
+    initializeOrderPage(immediateContent);
+  }
+  document.addEventListener('site:content-loaded', (event) => {
+    initializeOrderPage(event.detail);
+  }, { once: true });
+}
