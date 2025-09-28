@@ -41,18 +41,21 @@
       <div class="container">
         <p class="eyebrow">Online Booking</p>
         <h1>Reserve your Vida Beauty Brow service</h1>
-        <p>Select your desired treatments, customize add-ons, and confirm your visit in minutes. All bookings require a valid card on file. Questions? Text <a href="tel:+16894448876">(689) 444-8876</a>.</p>
+        <p>Build your service menu, reserve your preferred time, and submit your appointment request without leaving our site. Questions? Text <a href="tel:+16894448876">(689) 444-8876</a>.</p>
+        <p class="order-hours">Studio hours: Monday – Saturday, 10:30am – 6:00pm (Closed Sunday).</p>
         <div class="order-tools">
           <label class="order-tools__search" for="service-search">
             <span class="sr-only">Search services</span>
-            <input id="service-search" type="search" placeholder="Search brows, lashes, facials..." autocomplete="off">
+            <input id="service-search" type="search" placeholder="Search brows, waxing, microderm..." autocomplete="off">
           </label>
           <div class="order-tools__filters" role="group" aria-label="Filter services">
             <button class="filter-button is-active" data-filter="all">All</button>
-            <button class="filter-button" data-filter="brows">Brows</button>
-            <button class="filter-button" data-filter="lashes">Lashes</button>
+            <button class="filter-button" data-filter="featured">Featured</button>
+            <button class="filter-button" data-filter="brows">Brows &amp; Lashes</button>
+            <button class="filter-button" data-filter="wax">Waxing</button>
             <button class="filter-button" data-filter="skin">Skin</button>
-            <button class="filter-button" data-filter="pmu">PMU</button>
+            <button class="filter-button" data-filter="henna">Henna</button>
+            <button class="filter-button" data-filter="pmu">Permanent Makeup</button>
           </div>
           <label class="order-tools__sort" for="service-sort">
             <span class="sr-only">Sort services</span>
@@ -69,191 +72,210 @@
 
     <section class="service-menu" aria-label="Service menu">
       <div class="container">
-        <div class="service-group" id="brows">
+        <div class="service-group" id="featured">
           <header class="service-group__header">
-            <h2>Brow Design &amp; Lamination</h2>
-            <p>Signature brow sculpting, tinting, lamination, and maintenance packages to define and nourish your brows.</p>
+            <h2>Featured services</h2>
+            <p>Fan-favorite appointments that showcase our signature blend of artistry, skin expertise, and relaxation.</p>
           </header>
           <div class="service-list">
-            <article class="service-item" data-category="brows" data-price="65" data-duration="40">
+            <article class="service-item" data-category="featured skin" data-price="110" data-duration="55">
               <div>
-                <h3>Signature Brow Shaping &amp; Tint</h3>
-                <p>Includes consultation, mapping, precise waxing/threading, and custom blended tint.</p>
-                <ul>
-                  <li>40 minutes</li>
-                  <li>Perfect for first-time clients</li>
-                </ul>
-              </div>
-              <div class="service-item__meta">
-                <span class="service-item__price">$65</span>
-                <button class="service-item__add" data-service="Signature Brow Shaping &amp; Tint">Add</button>
-              </div>
-            </article>
-            <article class="service-item" data-category="brows" data-price="95" data-duration="60">
-              <div>
-                <h3>Brow Lamination + Nourishing Keratin</h3>
-                <p>Lifts and sets brow hairs for a fuller look. Includes shaping, tint, and keratin conditioning.</p>
-                <ul>
-                  <li>60 minutes</li>
-                  <li>Results last 6–8 weeks</li>
-                </ul>
-              </div>
-              <div class="service-item__meta">
-                <span class="service-item__price">$95</span>
-                <button class="service-item__add" data-service="Brow Lamination + Nourishing Keratin">Add</button>
-              </div>
-            </article>
-            <article class="service-item" data-category="brows" data-price="120" data-duration="75">
-              <div>
-                <h3>Hybrid Brow Stain &amp; Lamination</h3>
-                <p>Hybrid dye and lamination for extra depth and definition. Includes shaping and aftercare kit.</p>
-                <ul>
-                  <li>75 minutes</li>
-                  <li>Ideal for sparse brows</li>
-                </ul>
-              </div>
-              <div class="service-item__meta">
-                <span class="service-item__price">$120</span>
-                <button class="service-item__add" data-service="Hybrid Brow Stain &amp; Lamination">Add</button>
-              </div>
-            </article>
-          </div>
-        </div>
-
-        <div class="service-group" id="lashes">
-          <header class="service-group__header">
-            <h2>Lash Lift &amp; Extensions</h2>
-            <p>Enhance and volumize your lashes with keratin lifts or custom extension sets.</p>
-          </header>
-          <div class="service-list">
-            <article class="service-item" data-category="lashes" data-price="90" data-duration="55">
-              <div>
-                <h3>Keratin Lash Lift &amp; Tint</h3>
-                <p>Lift, curl, and tint your natural lashes with nourishing keratin for long-lasting results.</p>
+                <h3>Radiance Microdermabrasion Facial</h3>
+                <p>Crystal-tip exfoliation, nourishing mask, and massage to brighten, smooth, and refine skin.</p>
                 <ul>
                   <li>55 minutes</li>
-                  <li>Includes take-home care tips</li>
-                </ul>
-              </div>
-              <div class="service-item__meta">
-                <span class="service-item__price">$90</span>
-                <button class="service-item__add" data-service="Keratin Lash Lift &amp; Tint">Add</button>
-              </div>
-            </article>
-            <article class="service-item" data-category="lashes" data-price="150" data-duration="120">
-              <div>
-                <h3>Signature Hybrid Lash Extensions</h3>
-                <p>A blend of classic and volume fans for soft fullness. Includes consultation and styling customization.</p>
-                <ul>
-                  <li>120 minutes</li>
-                  <li>Refill recommended every 3 weeks</li>
-                </ul>
-              </div>
-              <div class="service-item__meta">
-                <span class="service-item__price">$150</span>
-                <button class="service-item__add" data-service="Signature Hybrid Lash Extensions">Add</button>
-              </div>
-            </article>
-            <article class="service-item" data-category="lashes" data-price="85" data-duration="45">
-              <div>
-                <h3>Lash Bath &amp; Extension Touch-Up</h3>
-                <p>Refresh extensions between fills with a gentle cleanse and strategic replacements.</p>
-                <ul>
-                  <li>45 minutes</li>
-                  <li>Great for events</li>
-                </ul>
-              </div>
-              <div class="service-item__meta">
-                <span class="service-item__price">$85</span>
-                <button class="service-item__add" data-service="Lash Bath &amp; Extension Touch-Up">Add</button>
-              </div>
-            </article>
-          </div>
-        </div>
-
-        <div class="service-group" id="skin">
-          <header class="service-group__header">
-            <h2>Skin Treatments</h2>
-            <p>Glow-enhancing facials combining dermaplaning, LED, and pro-grade exfoliation to renew and hydrate.</p>
-          </header>
-          <div class="service-list">
-            <article class="service-item" data-category="skin" data-price="110" data-duration="75">
-              <div>
-                <h3>Signature Glow Facial</h3>
-                <p>Double cleanse, enzyme exfoliation, dermaplaning, targeted treatment mask, and LED therapy.</p>
-                <ul>
-                  <li>75 minutes</li>
-                  <li>Customizable for all skin types</li>
+                  <li>Includes calming hydration finish</li>
                 </ul>
               </div>
               <div class="service-item__meta">
                 <span class="service-item__price">$110</span>
-                <button class="service-item__add" data-service="Signature Glow Facial">Add</button>
+                <button class="service-item__add" data-service="Radiance Microdermabrasion Facial">Add</button>
               </div>
             </article>
-            <article class="service-item" data-category="skin" data-price="85" data-duration="50">
+            <article class="service-item" data-category="featured henna brows" data-price="55" data-duration="45">
               <div>
-                <h3>Clarifying Acne Facial</h3>
-                <p>Purifying steam, extractions, and antibacterial LED to calm active breakouts and reduce congestion.</p>
+                <h3>Henna Brow Design</h3>
+                <p>Precise mapping, brow cleanse, natural henna stain, and nourishing oil treatment for a soft powdery finish.</p>
+                <ul>
+                  <li>45 minutes</li>
+                  <li>Custom-blended henna pigments</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">$55</span>
+                <button class="service-item__add" data-service="Henna Brow Design">Add</button>
+              </div>
+            </article>
+            <article class="service-item" data-category="featured pmu" data-price="75" data-duration="50">
+              <div>
+                <h3>Permanent Makeup Consultation</h3>
+                <p>Comprehensive mapping session to plan ombré brows, eyeliner, or lip blush. Deposit applies to your PMU appointment.</p>
                 <ul>
                   <li>50 minutes</li>
-                  <li>Includes soothing mask</li>
+                  <li>Includes custom design sketch</li>
                 </ul>
               </div>
               <div class="service-item__meta">
-                <span class="service-item__price">$85</span>
-                <button class="service-item__add" data-service="Clarifying Acne Facial">Add</button>
-              </div>
-            </article>
-            <article class="service-item" data-category="skin" data-price="130" data-duration="90">
-              <div>
-                <h3>Glow Peel + LED Therapy</h3>
-                <p>A gentle peel paired with LED to brighten, smooth texture, and even tone.</p>
-                <ul>
-                  <li>90 minutes</li>
-                  <li>Minimal downtime</li>
-                </ul>
-              </div>
-              <div class="service-item__meta">
-                <span class="service-item__price">$130</span>
-                <button class="service-item__add" data-service="Glow Peel + LED Therapy">Add</button>
+                <span class="service-item__price">$75</span>
+                <button class="service-item__add" data-service="Permanent Makeup Consultation">Add</button>
               </div>
             </article>
           </div>
         </div>
 
-        <div class="service-group" id="pmu">
+        <div class="service-group" id="brows">
           <header class="service-group__header">
-            <h2>Permanent Makeup</h2>
-            <p>Long-lasting brow artistry using ombré powder and nano techniques to create soft, natural definition.</p>
+            <h2>Eyebrows &amp; eyelashes</h2>
+            <p>Express detailing that keeps your brows and lashes polished between full appointments.</p>
           </header>
           <div class="service-list">
-            <article class="service-item" data-category="pmu" data-price="450" data-duration="180">
+            <article class="service-item" data-category="brows wax" data-price="18" data-duration="10">
               <div>
-                <h3>Ombré Powder Brows</h3>
-                <p>Consultation, mapping, custom pigment selection, and initial session. Perfectly fades into a powdery finish.</p>
+                <h3>Eyebrow Wax</h3>
+                <p>Brows shaped with gentle wax and precision finishing for clean arches.</p>
                 <ul>
-                  <li>3 hours</li>
-                  <li>Includes perfecting touch-up</li>
+                  <li>10 minutes</li>
+                  <li>Includes soothing post-wax serum</li>
                 </ul>
               </div>
               <div class="service-item__meta">
-                <span class="service-item__price">$450</span>
-                <button class="service-item__add" data-service="Ombré Powder Brows">Add</button>
+                <span class="service-item__price">$18</span>
+                <button class="service-item__add" data-service="Eyebrow Wax">Add</button>
               </div>
             </article>
-            <article class="service-item" data-category="pmu" data-price="150" data-duration="120">
+            <article class="service-item" data-category="brows" data-price="18" data-duration="10">
               <div>
-                <h3>6-12 Month PMU Refresh</h3>
-                <p>Color refresh and perfecting details for existing Vida Beauty Brow PMU clients.</p>
+                <h3>Eyebrow Threading</h3>
+                <p>Threadwork for crisp lines and a softly lifted brow shape tailored to your features.</p>
                 <ul>
-                  <li>2 hours</li>
-                  <li>Pre-care instructions provided</li>
+                  <li>10 minutes</li>
+                  <li>Great for sensitive skin</li>
                 </ul>
               </div>
               <div class="service-item__meta">
-                <span class="service-item__price">$150</span>
-                <button class="service-item__add" data-service="6-12 Month PMU Refresh">Add</button>
+                <span class="service-item__price">$18</span>
+                <button class="service-item__add" data-service="Eyebrow Threading">Add</button>
+              </div>
+            </article>
+            <article class="service-item" data-category="brows" data-price="20" data-duration="10">
+              <div>
+                <h3>Brow Tint</h3>
+                <p>Custom-mixed brow tint to enhance shape and fill soft gaps for up to two weeks.</p>
+                <ul>
+                  <li>10 minutes</li>
+                  <li>Add on to wax or threading</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">$20</span>
+                <button class="service-item__add" data-service="Brow Tint">Add</button>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="service-group" id="wax">
+          <header class="service-group__header">
+            <h2>Wax</h2>
+            <p>Body waxing performed with care to leave skin smooth, soft, and ready for whatever you have planned.</p>
+          </header>
+          <div class="service-list">
+            <article class="service-item" data-category="wax" data-price="10" data-duration="5">
+              <div>
+                <h3>Under Lip</h3>
+                <p>Quick under-lip wax to remove stray hairs. Perfect finishing touch to any brow service.</p>
+                <ul>
+                  <li>5 minutes</li>
+                  <li>From $10</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">from $10</span>
+                <button class="service-item__add" data-service="Under Lip Wax">Add</button>
+              </div>
+            </article>
+            <article class="service-item" data-category="wax" data-price="30" data-duration="20">
+              <div>
+                <h3>Half Arm Wax</h3>
+                <p>From shoulder to elbow or elbow to wrist using gentle wax for long-lasting smoothness.</p>
+                <ul>
+                  <li>20 minutes</li>
+                  <li>$30</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">$30</span>
+                <button class="service-item__add" data-service="Half Arm Wax">Add</button>
+              </div>
+            </article>
+            <article class="service-item" data-category="wax" data-price="45" data-duration="25">
+              <div>
+                <h3>Full Arm Wax</h3>
+                <p>Complete arm wax leaving skin soft from shoulder to fingertips.</p>
+                <ul>
+                  <li>25 minutes</li>
+                  <li>$45</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">$45</span>
+                <button class="service-item__add" data-service="Full Arm Wax">Add</button>
+              </div>
+            </article>
+            <article class="service-item" data-category="wax" data-price="30" data-duration="20">
+              <div>
+                <h3>Bikini Line Wax</h3>
+                <p>Clean up the bikini line with precision waxing and post-care soothing gel.</p>
+                <ul>
+                  <li>20 minutes</li>
+                  <li>$30</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">$30</span>
+                <button class="service-item__add" data-service="Bikini Line Wax">Add</button>
+              </div>
+            </article>
+            <article class="service-item" data-category="wax" data-price="45" data-duration="30">
+              <div>
+                <h3>Half Leg Wax</h3>
+                <p>Choose upper or lower legs; includes knee detailing and calming moisturizer.</p>
+                <ul>
+                  <li>30 minutes</li>
+                  <li>$45</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">$45</span>
+                <button class="service-item__add" data-service="Half Leg Wax">Add</button>
+              </div>
+            </article>
+            <article class="service-item" data-category="wax" data-price="80" data-duration="60">
+              <div>
+                <h3>Full Leg Wax</h3>
+                <p>Full leg wax from thigh to ankle with gentle technique for minimal irritation.</p>
+                <ul>
+                  <li>60 minutes</li>
+                  <li>$80</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">$80</span>
+                <button class="service-item__add" data-service="Full Leg Wax">Add</button>
+              </div>
+            </article>
+            <article class="service-item" data-category="wax" data-price="28" data-duration="25">
+              <div>
+                <h3>Underarm Wax</h3>
+                <p>Underarm hair removal finished with cool compress and calming oil.</p>
+                <ul>
+                  <li>25 minutes</li>
+                  <li>$28</li>
+                </ul>
+              </div>
+              <div class="service-item__meta">
+                <span class="service-item__price">$28</span>
+                <button class="service-item__add" data-service="Underarm Wax">Add</button>
               </div>
             </article>
           </div>
@@ -265,7 +287,7 @@
       <div class="container">
         <div class="cart__summary">
           <h2 id="cart-heading">Your booking</h2>
-          <p class="cart__note">Select services to build your appointment. You can adjust order before confirming.</p>
+          <p class="cart__note">Select services to build your appointment request. You can review or remove items before submitting.</p>
           <ul class="cart__items" aria-live="polite"></ul>
           <dl class="cart__totals">
             <div>
@@ -278,7 +300,7 @@
             </div>
           </dl>
           <button class="button" id="start-checkout" type="button">Proceed to checkout</button>
-          <p class="cart__disclaimer">A credit card is required to secure your appointment. Cancellations within 24 hours may incur a fee.</p>
+          <p class="cart__disclaimer">Requests are reviewed during business hours. We’ll reach out to confirm, secure a card on file, and answer any questions.</p>
         </div>
         <form class="cart__form" aria-label="Guest details">
           <div class="form-field">

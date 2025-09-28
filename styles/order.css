@@ -3,8 +3,19 @@
 }
 
 .order-hero {
-  padding: 4rem 0 3rem;
-  background: linear-gradient(120deg, rgba(140, 90, 60, 0.12), rgba(255, 255, 255, 0.85));
+  padding: 4.5rem 0 3.5rem;
+  background: linear-gradient(135deg, rgba(161, 86, 240, 0.12), rgba(247, 183, 213, 0.18));
+  position: relative;
+  overflow: hidden;
+}
+
+.order-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% -10%, rgba(193, 132, 255, 0.3), transparent 55%),
+    radial-gradient(circle at 90% 0%, rgba(255, 255, 255, 0.3), transparent 50%);
+  pointer-events: none;
 }
 
 .order-hero h1 {
@@ -16,6 +27,12 @@
 .order-hero p {
   max-width: 52ch;
   color: var(--color-muted);
+}
+
+.order-hours {
+  margin-top: 1rem;
+  font-weight: 600;
+  color: var(--color-primary-dark);
 }
 
 .order-tools {
@@ -30,11 +47,12 @@
   width: 100%;
   padding: 0.85rem 1rem;
   border-radius: 999px;
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(161, 86, 240, 0.2);
   font-family: inherit;
   font-size: 1rem;
-  background: #fff;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(6px);
+  box-shadow: inset 0 1px 3px rgba(161, 86, 240, 0.08);
 }
 
 .order-tools__filters {
@@ -48,18 +66,19 @@
   min-width: 90px;
   padding: 0.65rem 1.1rem;
   border-radius: 999px;
-  border: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(161, 86, 240, 0.2);
+  background: rgba(255, 255, 255, 0.75);
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, border 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, border 0.2s ease, box-shadow 0.2s ease;
 }
 
 .filter-button.is-active,
 .filter-button:hover,
 .filter-button:focus {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary), #c88cff);
+  border-color: transparent;
+  box-shadow: 0 12px 24px rgba(161, 86, 240, 0.22);
   color: #fff;
 }
 
@@ -97,12 +116,13 @@
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 1.5rem;
-  padding: 2rem;
+  padding: 2.25rem 2rem;
   border-radius: var(--radius);
-  background: #fff;
-  border: 1px solid var(--color-border);
+  background: var(--gradient-card);
+  border: 1px solid rgba(161, 86, 240, 0.18);
   box-shadow: var(--shadow-soft);
   align-items: center;
+  backdrop-filter: blur(6px);
 }
 
 .service-item h3 {
@@ -138,23 +158,24 @@
 .service-item__add {
   padding: 0.65rem 1.4rem;
   border-radius: 999px;
-  border: 1px solid var(--color-primary);
-  background: transparent;
-  color: var(--color-primary-dark);
+  border: none;
+  background: linear-gradient(135deg, var(--color-primary), #c88cff);
+  color: #fff;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  box-shadow: 0 18px 30px rgba(161, 86, 240, 0.22);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .service-item__add:hover,
 .service-item__add:focus {
-  background: var(--color-primary);
-  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 24px 42px rgba(161, 86, 240, 0.3);
 }
 
 .cart {
   padding: 4rem 0 6rem;
-  background: #fff;
+  background: rgba(249, 245, 255, 0.65);
 }
 
 .cart .container {
@@ -164,10 +185,10 @@
 }
 
 .cart__summary {
-  padding: 2.5rem 2rem;
+  padding: 2.75rem 2.25rem;
   border-radius: var(--radius);
-  border: 1px solid var(--color-border);
-  background: #fffaf5;
+  border: 1px solid rgba(161, 86, 240, 0.18);
+  background: var(--gradient-card);
   box-shadow: var(--shadow-soft);
 }
 
@@ -227,10 +248,10 @@
 }
 
 .cart__form {
-  padding: 2.5rem 2rem;
+  padding: 2.75rem 2.25rem;
   border-radius: var(--radius);
-  border: 1px solid var(--color-border);
-  background: #fff;
+  border: 1px solid rgba(161, 86, 240, 0.18);
+  background: var(--gradient-card);
   box-shadow: var(--shadow-soft);
 }
 
@@ -247,12 +268,12 @@
 
 .form-field input,
 .form-field textarea {
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(161, 86, 240, 0.24);
   border-radius: 12px;
   padding: 0.75rem 1rem;
   font-family: inherit;
   font-size: 1rem;
-  background: #fffaf5;
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .form-field textarea {

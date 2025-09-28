@@ -10,6 +10,11 @@ const startCheckout = document.querySelector('#start-checkout');
 const cartForm = document.querySelector('.cart__form');
 
 const cart = [];
+const currencyFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0,
+});
 
 function normalize(text) {
   return text.toLowerCase().trim();
@@ -21,7 +26,8 @@ function filterServices() {
 
   serviceItems.forEach((item) => {
     const matchesText = !query || normalize(item.textContent).includes(query);
-    const matchesCategory = activeFilter === 'all' || item.dataset.category === activeFilter;
+    const categories = (item.dataset.category || '').split(/\s+/).filter(Boolean);
+    const matchesCategory = activeFilter === 'all' || categories.includes(activeFilter);
     item.style.display = matchesText && matchesCategory ? '' : 'none';
   });
 
@@ -62,7 +68,7 @@ function updateCart() {
       li.innerHTML = `
         <div>
           <div class="cart__item-title">${item.name}</div>
-          <div class="cart__item-meta">${item.duration} min • $${item.price}</div>
+          <div class="cart__item-meta">${item.duration} min • ${currencyFormatter.format(item.price)}</div>
         </div>
         <button class="cart__remove" type="button" data-index="${index}">Remove</button>
       `;
@@ -73,7 +79,7 @@ function updateCart() {
   const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
   const totalDuration = cart.reduce((sum, item) => sum + item.duration, 0);
 
-  subtotalEl.textContent = `$${subtotal}`;
+  subtotalEl.textContent = currencyFormatter.format(subtotal);
   durationEl.textContent = `${totalDuration} min`;
 }
 
