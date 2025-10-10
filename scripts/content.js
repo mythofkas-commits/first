@@ -358,6 +358,8 @@
     setContent('order.hero.hours', orderPage.hero?.hours);
     setContent('order.checkout.instructions', orderPage.checkout?.instructions);
     setContent('order.checkout.cta', orderPage.checkout?.cta);
+    updateOptionalContent('order.checkout.paymentNote', orderPage.checkout?.paymentNote, { html: true });
+    updateOptionalContent('order.checkout.cms.note', orderPage.checkout?.cms?.note, { html: true });
     setContent('order.footer.note', orderPage.footer?.note, { html: true });
 
     renderOrderFilters(orderPage.filters);
@@ -440,6 +442,27 @@
         node.innerHTML = value;
       } else {
         node.textContent = value;
+      }
+    });
+  }
+
+  function updateOptionalContent(key, value, { html = false } = {}) {
+    const nodes = document.querySelectorAll(`[data-content="${key}"]`);
+    nodes.forEach((node) => {
+      if (value == null || value === '') {
+        node.hidden = true;
+        if (html) {
+          node.innerHTML = '';
+        } else {
+          node.textContent = '';
+        }
+      } else {
+        node.hidden = false;
+        if (html) {
+          node.innerHTML = value;
+        } else {
+          node.textContent = value;
+        }
       }
     });
   }
