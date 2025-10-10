@@ -1,4 +1,4 @@
-name: Deploy (smoke)
+name: Deploy to VPS (atomic)
 
 on:
   push:
@@ -6,18 +6,74 @@ on:
 
 jobs:
   deploy:
-    # lands on your VPS because it has the built-in 'self-hosted' + 'linux' + 'x64' labels
-    runs-on: self-hosted
+    runs-on: self-hosted  # lands on your vidabrow runner
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
-      - name: Atomic release to /srv/vidabrow
+      - name: Detect stack
+        id: detect
+        run: |
+          set -euo pipefail
+          dist="."
+          if [ -f package.json ] && jq -r '.scripts.build // empty' package.json >/dev/null 2>&1; then
+            echo "has_node_build=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_node_build=false" >> $GITHUB_OUTPUT
+          fi
+          if [ -f composer.json ]; then
+            echo "has_composer=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_composer=false" >> $GITHUB_OUTPUT
+          fi
+          echo "dist=$dist" >> $GITHUB_OUTPUT
+
+      # Optional Node build (uncomment if you have a build step)
+      # - name: Setup Node
+      #   if: steps.detect.outputs.has_node_build == 'true'
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: '20'
+      #     cache: 'npm'
+      #
+      # - name: Build (npm ci && npm run build)
+      #   if: steps.detect.outputs.has_node_build == 'true'
+      #   run: |
+      #     npm ci
+      #     npm run build
+      #     echo "dist=dist" >> $GITHUB_OUTPUT
+
+      - name: Atomic release
+        env:
+          DIST: ${{ steps.detect.outputs.dist }}
         run: |
           set -euo pipefail
           ts=$(date +%Y%m%d%H%M%S)
           rel="/srv/vidabrow/releases/$ts"
           mkdir -p "$rel"
-          printf '<!doctype html><meta charset=utf-8><title>Vida Brow</title><h1>Deployed %s</h1>\n' "$ts" > "$rel/index.html"
+          # copy repo (or built assets) into the new release
+          rsync -a --delete \
+            --exclude=.git --exclude=.github \
+            --exclude=node_modules --exclude=.env \
+            "$DIST"/ "$rel"/
+
+          # If composer.json exists, install composer locally and run install (no root needed)
+          if [ -f "$rel/composer.json" ]; then
+            mkdir -p "$HOME/bin"
+            if ! command -v "$HOME/bin/composer" >/dev/null 2>&1; then
+              php -r "copy('https://getcomposer.org/installer','composer-setup.php');" \
+                && php composer-setup.php --install-dir="$HOME/bin" --filename=composer \
+                && rm composer-setup.php
+            fi
+            ( cd "$rel" && "$HOME/bin/composer" install --no-dev --prefer-dist --no-interaction --optimize-autoloader )
+          fi
+
+          # flip symlink and reload services
           ln -sfn "$rel" /srv/vidabrow/current
-          sudo systemctl reload nginx
+          sudo systemctl reload nginx || true
+          # reload PHP-FPM if present (covers common service names)
+          for svc in php8.3-fpm php8.2-fpm php8.1-fpm php8.0-fpm php7.4-fpm; do
+            systemctl is-active --quiet "$svc" && sudo systemctl reload "$svc" || true
+          done
