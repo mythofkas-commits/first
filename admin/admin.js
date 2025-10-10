@@ -559,11 +559,22 @@ function updatePublishButton() {
   elements.publishChanges.textContent = state.saving ? 'Saving…' : state.publishLabel;
 }
 
+/**
+ * Deep clones a value. Uses structuredClone if available, otherwise falls back to JSON methods.
+ * Limitations of the fallback: functions, undefined values, and circular references are not supported.
+ * If the fallback fails, an error is thrown.
+ */
 function clone(value) {
   if (typeof structuredClone === 'function') {
     return structuredClone(value);
   }
-  return JSON.parse(JSON.stringify(value));
+  try {
+    return JSON.parse(JSON.stringify(value));
+  } catch (error) {
+    throw new Error('Fallback clone failed: ' +
+      'Objects with functions, undefined values, or circular references cannot be cloned. ' +
+      error.message);
+  }
 }
 
 init();
