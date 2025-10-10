@@ -20,7 +20,11 @@ let serviceItems = [];
 let serviceLists = [];
 let defaultOrder = new Map();
 let initialized = false;
-let checkoutConfig = { mode: 'form', stripe: {}, cms: {} };
+let checkoutConfig = {
+  mode: 'form',
+  stripe: { apiKey: null, sessionId: null },
+  cms: { endpoint: null, token: null }
+};
 
 function initDomReferences() {
   serviceSearch = document.querySelector('#service-search');
