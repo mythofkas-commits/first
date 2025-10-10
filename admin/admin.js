@@ -24,7 +24,7 @@ const elements = {
   saveJson: document.getElementById('save-json'),
 };
 
-let sectionObserver;
+let sectionObserver = null;
 
 async function init() {
   if (elements.tokenInput) {
