@@ -1,3 +1,180 @@
+const DEFAULT_DATA = {
+  site: {
+    name: '',
+    tagline: '',
+    meta: {
+      description: '',
+      keywords: '',
+      canonicalUrl: '',
+    },
+    brand: {
+      logoText: '',
+      logoImage: '',
+    },
+    contact: {
+      phone: '',
+      phoneDisplay: '',
+      email: '',
+      address: '',
+      hours: '',
+    },
+    navigation: [],
+    social: [],
+    cta: {
+      label: '',
+      href: '',
+    },
+    footer: {
+      description: '',
+      links: [],
+    },
+  },
+  design: {
+    colors: {},
+    shadows: {},
+    radii: {},
+    gradients: {},
+    fonts: {
+      heading: '',
+      body: '',
+    },
+    customCss: '',
+  },
+  homepage: {
+    hero: {
+      eyebrow: '',
+      title: '',
+      description: '',
+      rating: {
+        score: '',
+        details: '',
+      },
+      primaryCta: {
+        label: '',
+        href: '',
+      },
+      secondaryCta: {
+        label: '',
+        href: '',
+      },
+      image: {
+        src: '',
+        alt: '',
+      },
+    },
+    badges: [],
+    services: {
+      eyebrow: '',
+      title: '',
+      description: '',
+      cards: [],
+    },
+    experience: {
+      eyebrow: '',
+      title: '',
+      description: '',
+      cta: {
+        label: '',
+        href: '',
+      },
+      image: {
+        src: '',
+        alt: '',
+      },
+      highlights: [],
+    },
+    results: {
+      eyebrow: '',
+      title: '',
+      description: '',
+      gallery: [],
+    },
+    reviews: {
+      eyebrow: '',
+      title: '',
+      description: '',
+      testimonials: [],
+    },
+    ctaBanner: {
+      title: '',
+      description: '',
+      cta: {
+        label: '',
+        href: '',
+      },
+    },
+    contact: {
+      eyebrow: '',
+      title: '',
+      description: '',
+      mapEmbed: '',
+      details: [],
+    },
+    footer: {
+      note: '',
+    },
+    meta: {
+      canonicalUrl: '',
+      description: '',
+    },
+  },
+  orderPage: {
+    hero: {
+      eyebrow: '',
+      title: '',
+      description: '',
+      hours: '',
+    },
+    filters: [],
+    serviceMenu: [],
+    checkout: {
+      mode: 'form',
+      cta: '',
+      instructions: '',
+      submitMessage: '',
+      paymentNote: '',
+      stripe: {
+        enabled: false,
+        publishableKey: '',
+        priceId: '',
+        checkoutLink: '',
+        successUrl: '',
+        cancelUrl: '',
+        buttonLabel: '',
+        supportEmail: '',
+      },
+      cms: {
+        note: '',
+        dashboardUrl: '',
+        buttonLabel: '',
+      },
+    },
+    footer: {
+      note: '',
+    },
+  },
+  integrations: {
+    stripe: {
+      enabled: false,
+      publishableKey: '',
+      secretKey: '',
+      webhookSecret: '',
+      priceIds: '',
+      dashboardUrl: '',
+      notes: '',
+    },
+    cms: {
+      enabled: false,
+      provider: '',
+      baseUrl: '',
+      apiKey: '',
+      previewUrl: '',
+      notes: '',
+    },
+  },
+  pages: [],
+};
+
 const state = {
   data: null,
   snapshot: null,
@@ -24,7 +201,43 @@ const elements = {
   saveJson: document.getElementById('save-json'),
 };
 
-let sectionObserver = null;
+let sectionObserver;
+
+function getDefaultData() {
+  if (typeof structuredClone === 'function') {
+    return structuredClone(DEFAULT_DATA);
+  }
+  return JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+
+function mergeWithDefaults(data) {
+  const base = getDefaultData();
+  if (!isPlainObject(data)) {
+    return base;
+  }
+  return deepAssign(base, data);
+}
+
+function deepAssign(target, source) {
+  if (!isPlainObject(target) || !isPlainObject(source)) {
+    return target;
+  }
+  Object.keys(source).forEach((key) => {
+    const value = source[key];
+    if (Array.isArray(value)) {
+      target[key] = value.map((item) => (isPlainObject(item) ? deepAssign({}, item) : item));
+    } else if (isPlainObject(value)) {
+      target[key] = deepAssign(isPlainObject(target[key]) ? target[key] : {}, value);
+    } else {
+      target[key] = value;
+    }
+  });
+  return target;
+}
+
+function isPlainObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
 
 async function init() {
   if (elements.tokenInput) {
@@ -154,27 +367,59 @@ function setActiveSection(id) {
 }
 
 async function loadContent() {
+  let statusMessage = 'Content loaded successfully.';
+  let statusClass = 'admin-status admin-status--success';
   try {
-    const response = await fetch('/api/site');
+    const response = await fetch('/api/site', { cache: 'no-store' });
     if (!response.ok) {
-      throw new Error(`Failed to load site content (${response.status})`);
+      const payload = await response.json().catch(() => ({}));
+      const message = payload.error ? `${payload.error} (${response.status})` : `Failed to load site content (${response.status})`;
+      throw new Error(message);
     }
     const data = await response.json();
-    state.data = data;
-    state.snapshot = JSON.stringify(data);
-    populateForm();
-    setDirty(false);
-    if (elements.jsonStatus) {
-      elements.jsonStatus.textContent = 'Content loaded successfully.';
-      elements.jsonStatus.className = 'admin-status admin-status--success';
-    }
+    applyData(data, { snapshotSource: data });
   } catch (error) {
     console.error(error);
-    if (elements.jsonStatus) {
-      elements.jsonStatus.textContent = 'Failed to load site data. Check the server logs.';
-      elements.jsonStatus.className = 'admin-status admin-status--error';
+    const fallback = await loadFallbackData();
+    if (fallback) {
+      applyData(fallback, { snapshotSource: fallback });
+      statusMessage = 'Loaded content from local site.json. Publishing will sync to the server API when available.';
+      statusClass = 'admin-status admin-status--warning';
+    } else {
+      const blank = getDefaultData();
+      applyData(blank, { snapshotSource: blank });
+      statusMessage = 'Started with blank defaults. Fill out the form, then publish when your server is ready.';
+      statusClass = 'admin-status admin-status--warning';
     }
   }
+  if (elements.jsonStatus) {
+    elements.jsonStatus.textContent = statusMessage;
+    elements.jsonStatus.className = statusClass;
+  }
+}
+
+async function loadFallbackData() {
+  try {
+    const response = await fetch('/data/site.json', { cache: 'no-store' });
+    if (!response.ok) {
+      return null;
+    }
+    return await response.json();
+  } catch (error) {
+    console.warn('Fallback data unavailable', error);
+    return null;
+  }
+}
+
+function applyData(data, options = {}) {
+  const merged = mergeWithDefaults(data);
+  state.data = merged;
+  const snapshotSource = options.snapshotSource && isPlainObject(options.snapshotSource)
+    ? options.snapshotSource
+    : (isPlainObject(data) ? data : merged);
+  state.snapshot = JSON.stringify(snapshotSource);
+  populateForm();
+  setDirty(false);
 }
 
 function populateForm() {
@@ -498,10 +743,7 @@ async function saveData(nextData) {
       const payload = await response.json().catch(() => ({}));
       throw new Error(payload.error || `Save failed (${response.status})`);
     }
-    state.data = nextData;
-    state.snapshot = JSON.stringify(nextData);
-    populateForm();
-    setDirty(false);
+    applyData(nextData, { snapshotSource: nextData });
     if (elements.jsonStatus) {
       elements.jsonStatus.textContent = 'Changes saved successfully.';
       elements.jsonStatus.className = 'admin-status admin-status--success';
@@ -523,9 +765,7 @@ function restoreSnapshot() {
   if (!confirmed) return;
   try {
     const parsed = JSON.parse(state.snapshot);
-    state.data = parsed;
-    populateForm();
-    setDirty(false);
+    applyData(parsed, { snapshotSource: parsed });
     if (elements.jsonStatus) {
       elements.jsonStatus.textContent = 'Changes reverted to last saved version.';
       elements.jsonStatus.className = 'admin-status';
@@ -559,22 +799,11 @@ function updatePublishButton() {
   elements.publishChanges.textContent = state.saving ? 'Saving…' : state.publishLabel;
 }
 
-/**
- * Deep clones a value. Uses structuredClone if available, otherwise falls back to JSON methods.
- * Limitations of the fallback: functions, undefined values, and circular references are not supported.
- * If the fallback fails, an error is thrown.
- */
 function clone(value) {
   if (typeof structuredClone === 'function') {
     return structuredClone(value);
   }
-  try {
-    return JSON.parse(JSON.stringify(value));
-  } catch (error) {
-    throw new Error('Fallback clone failed: ' +
-      'Objects with functions, undefined values, or circular references cannot be cloned. ' +
-      error.message);
-  }
+  return JSON.parse(JSON.stringify(value));
 }
 
 init();

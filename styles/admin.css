@@ -292,6 +292,10 @@ a {
   color: var(--admin-danger);
 }
 
+.admin-status--warning {
+  color: #b45309;
+}
+
 .admin-preview {
   margin-top: 1.75rem;
   padding: 1.25rem;
