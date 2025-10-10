@@ -461,7 +461,7 @@ function applyData(data, options = {}) {
   const snapshotSource = options.snapshotSource && isPlainObject(options.snapshotSource)
     ? options.snapshotSource
     : (isPlainObject(data) ? data : merged);
-  state.snapshot = clone(snapshotSource);
+  state.snapshot = JSON.stringify(snapshotSource);
   populateForm();
   setDirty(false);
 }
