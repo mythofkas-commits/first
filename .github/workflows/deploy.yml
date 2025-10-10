@@ -1,0 +1,23 @@
+name: Deploy (smoke)
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    # lands on your VPS because it has the built-in 'self-hosted' + 'linux' + 'x64' labels
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Atomic release to /srv/vidabrow
+        run: |
+          set -euo pipefail
+          ts=$(date +%Y%m%d%H%M%S)
+          rel="/srv/vidabrow/releases/$ts"
+          mkdir -p "$rel"
+          printf '<!doctype html><meta charset=utf-8><title>Vida Brow</title><h1>Deployed %s</h1>\n' "$ts" > "$rel/index.html"
+          ln -sfn "$rel" /srv/vidabrow/current
+          sudo systemctl reload nginx
