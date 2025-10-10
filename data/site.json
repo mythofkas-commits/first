@@ -453,9 +453,26 @@
       }
     ],
     "checkout": {
+      "mode": "form",
       "cta": "Start Checkout",
       "instructions": "Complete the form with your preferred appointment times and we will reach out to confirm within one business day.",
-      "submitMessage": "Thank you! Your appointment request has been sent. We will reach out shortly."
+      "submitMessage": "Thank you! Your appointment request has been sent. We will reach out shortly.",
+      "paymentNote": "Prefer to pay online? Use our secure Stripe checkout option to reserve instantly.",
+      "stripe": {
+        "enabled": false,
+        "publishableKey": "",
+        "priceId": "",
+        "checkoutLink": "",
+        "successUrl": "",
+        "cancelUrl": "",
+        "buttonLabel": "Pay & Reserve with Stripe",
+        "supportEmail": ""
+      },
+      "cms": {
+        "note": "Team members can confirm requests in our CMS dashboard.",
+        "dashboardUrl": "",
+        "buttonLabel": "Open booking CMS"
+      }
     },
     "footer": {
       "note": "Questions about booking? Call <a href=\"tel:+16894448876\">(689) 444-8876</a> or email <a href=\"mailto:hello@vidabeautybrow.com\">hello@vidabeautybrow.com</a>."
@@ -463,6 +480,25 @@
     "meta": {
       "canonicalUrl": "https://www.vidabeautybrow.com/order",
       "description": "Reserve eyebrow shaping, lamination, lash, skincare, and permanent makeup services at Vida Beauty Brow in Altamonte Springs."
+    }
+  },
+  "integrations": {
+    "stripe": {
+      "enabled": false,
+      "publishableKey": "",
+      "secretKey": "",
+      "webhookSecret": "",
+      "priceIds": "",
+      "dashboardUrl": "",
+      "notes": ""
+    },
+    "cms": {
+      "enabled": false,
+      "provider": "",
+      "baseUrl": "",
+      "apiKey": "",
+      "previewUrl": "",
+      "notes": ""
     }
   },
   "pages": [

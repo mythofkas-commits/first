@@ -11,12 +11,20 @@ let cartList;
 let subtotalEl;
 let durationEl;
 let startCheckout;
+let stripeButton;
+let cmsDashboard;
+let integrationContainer;
 let cartForm;
 let filterButtons = [];
 let serviceItems = [];
 let serviceLists = [];
 let defaultOrder = new Map();
 let initialized = false;
+let checkoutConfig = {
+  mode: 'form',
+  stripe: { apiKey: null, sessionId: null },
+  cms: { endpoint: null, token: null }
+};
 
 function initDomReferences() {
   serviceSearch = document.querySelector('#service-search');
@@ -25,7 +33,13 @@ function initDomReferences() {
   subtotalEl = document.querySelector('#cart-subtotal');
   durationEl = document.querySelector('#cart-duration');
   startCheckout = document.querySelector('#start-checkout');
+  stripeButton = document.querySelector('[data-role="stripe-button"]');
+  cmsDashboard = document.querySelector('[data-role="cms-dashboard"]');
+  integrationContainer = document.querySelector('.cart__integrations');
   cartForm = document.querySelector('.cart__form');
+  if (startCheckout && !startCheckout.dataset.defaultLabel) {
+    startCheckout.dataset.defaultLabel = startCheckout.textContent;
+  }
 }
 
 function refreshCollections() {
@@ -270,10 +284,7 @@ function initializeOrderPage(content) {
       sortServices(sortSelect.value);
     });
 
-    startCheckout?.addEventListener('click', () => {
-      cartForm?.scrollIntoView({ behavior: 'smooth' });
-      cartForm?.querySelector('input, textarea')?.focus({ preventScroll: true });
-    });
+    startCheckout?.addEventListener('click', handleCheckoutClick);
 
     cartForm?.addEventListener('submit', (event) => {
       event.preventDefault();
@@ -295,6 +306,7 @@ function initializeOrderPage(content) {
   if (content?.orderPage) {
     buildFilters(content.orderPage.filters);
     buildServiceMenu(content.orderPage.serviceMenu);
+    configureCheckout(content.orderPage.checkout);
   }
 
   refreshCollections();
@@ -302,6 +314,71 @@ function initializeOrderPage(content) {
   attachServiceListListeners();
   filterServices();
   updateCart();
+}
+
+function handleCheckoutClick(event) {
+  if (checkoutConfig.mode === 'stripe') {
+    event.preventDefault();
+    return;
+  }
+  cartForm?.scrollIntoView({ behavior: 'smooth' });
+  cartForm?.querySelector('input, textarea, select')?.focus({ preventScroll: true });
+}
+
+function configureCheckout(checkout = {}) {
+  checkoutConfig = {
+    mode: checkout?.mode || 'form',
+    stripe: checkout?.stripe || {},
+    cms: checkout?.cms || {},
+  };
+
+  if (startCheckout) {
+    const label = checkout?.cta || startCheckout.dataset.defaultLabel || startCheckout.textContent;
+    if (label) {
+      startCheckout.textContent = label;
+    }
+    const hideStart = checkoutConfig.mode === 'stripe' && checkoutConfig.stripe?.enabled;
+    startCheckout.hidden = hideStart;
+    startCheckout.disabled = hideStart;
+  }
+
+  if (cartForm) {
+    cartForm.hidden = checkoutConfig.mode === 'stripe' && checkoutConfig.stripe?.enabled;
+  }
+
+  if (stripeButton) {
+    const stripe = checkoutConfig.stripe;
+    if (stripe?.enabled && stripe.checkoutLink) {
+      stripeButton.hidden = false;
+      stripeButton.textContent = stripe.buttonLabel || 'Pay & Reserve with Stripe';
+      stripeButton.href = stripe.checkoutLink;
+      stripeButton.target = stripe.openInNewTab === false ? '_self' : '_blank';
+      stripeButton.rel = stripeButton.target === '_blank' ? 'noopener' : '';
+    } else {
+      stripeButton.hidden = true;
+      stripeButton.removeAttribute('href');
+    }
+  }
+
+  if (cmsDashboard) {
+    const cms = checkoutConfig.cms;
+    if (cms?.dashboardUrl) {
+      cmsDashboard.hidden = false;
+      cmsDashboard.href = cms.dashboardUrl;
+      cmsDashboard.textContent = cms.buttonLabel || 'Open booking CMS';
+      cmsDashboard.target = '_blank';
+      cmsDashboard.rel = 'noopener';
+    } else {
+      cmsDashboard.hidden = true;
+      cmsDashboard.removeAttribute('href');
+    }
+  }
+
+  if (integrationContainer) {
+    const stripeVisible = Boolean(stripeButton && !stripeButton.hidden);
+    const cmsVisible = Boolean(cmsDashboard && !cmsDashboard.hidden);
+    integrationContainer.hidden = !stripeVisible && !cmsVisible;
+  }
 }
 
 if (document.body && document.body.classList.contains('order-page')) {

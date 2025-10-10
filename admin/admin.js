@@ -3,12 +3,19 @@ const state = {
   snapshot: null,
   token: localStorage.getItem('adminToken') || '',
   dirty: false,
+  saving: false,
+  publishLabel: 'Publish changes',
 };
 
 const elements = {
   tokenInput: document.getElementById('admin-token'),
   saveToken: document.getElementById('save-token'),
+  clearToken: document.getElementById('clear-token'),
   tokenStatus: document.getElementById('token-status'),
+  reloadContent: document.getElementById('reload-content'),
+  discardChanges: document.getElementById('discard-changes'),
+  publishChanges: document.getElementById('publish-changes'),
+  unsavedIndicator: document.getElementById('unsaved-indicator'),
   designPreview: document.getElementById('design-preview'),
   jsonEditor: document.getElementById('json-editor'),
   jsonStatus: document.getElementById('json-status'),
@@ -17,11 +24,18 @@ const elements = {
   saveJson: document.getElementById('save-json'),
 };
 
+let sectionObserver = null;
+
 async function init() {
   if (elements.tokenInput) {
     elements.tokenInput.value = state.token;
   }
+  if (elements.publishChanges) {
+    state.publishLabel = elements.publishChanges.textContent.trim() || state.publishLabel;
+  }
   attachEventListeners();
+  setupCollections();
+  setupSectionObserver();
   await loadContent();
 }
 
@@ -39,14 +53,41 @@ function attachEventListeners() {
     elements.tokenStatus.className = 'admin-status admin-status--success';
   });
 
-  document.querySelectorAll('[data-path]').forEach((field) => {
+  elements.clearToken?.addEventListener('click', () => {
+    state.token = '';
+    if (elements.tokenInput) {
+      elements.tokenInput.value = '';
+    }
+    localStorage.removeItem('adminToken');
+    elements.tokenStatus.textContent = 'Token removed. Enter it again before publishing.';
+    elements.tokenStatus.className = 'admin-status';
+  });
+
+  elements.reloadContent?.addEventListener('click', () => {
+    loadContent();
+  });
+
+  elements.discardChanges?.addEventListener('click', () => {
+    restoreSnapshot();
+  });
+
+  elements.publishChanges?.addEventListener('click', async () => {
+    if (!state.data) return;
+    await saveData(clone(state.data));
+  });
+
+  const fields = document.querySelectorAll('[data-path]');
+  fields.forEach((field) => {
     field.addEventListener('input', (event) => handleFieldChange(event.target));
+    field.addEventListener('change', (event) => handleFieldChange(event.target));
   });
 
   elements.jsonEditor?.addEventListener('input', () => {
-    state.dirty = true;
-    elements.jsonStatus.textContent = 'Unsaved changes in JSON editor.';
-    elements.jsonStatus.className = 'admin-status';
+    setDirty(true);
+    if (elements.jsonStatus) {
+      elements.jsonStatus.textContent = 'Unsaved changes in JSON editor.';
+      elements.jsonStatus.className = 'admin-status';
+    }
   });
 
   elements.formatJson?.addEventListener('click', () => {
@@ -54,18 +95,61 @@ function attachEventListeners() {
   });
 
   elements.resetJson?.addEventListener('click', () => {
-    if (!state.snapshot) return;
-    const confirmed = confirm('Reset all unsaved changes?');
-    if (!confirmed) return;
-    state.data = JSON.parse(state.snapshot);
-    state.dirty = false;
-    populateForm();
-    elements.jsonStatus.textContent = 'Changes reverted to last saved version.';
-    elements.jsonStatus.className = 'admin-status';
+    restoreSnapshot();
   });
 
   elements.saveJson?.addEventListener('click', () => {
     saveFromJsonEditor();
+  });
+
+  window.addEventListener('beforeunload', (event) => {
+    if (!state.dirty) return;
+    event.preventDefault();
+    event.returnValue = '';
+  });
+}
+
+function setupCollections() {
+  document.querySelectorAll('[data-collection]').forEach((collection) => {
+    if (collection.dataset.collectionInit) return;
+    collection.dataset.collectionInit = 'true';
+    collection.addEventListener('click', handleCollectionClick);
+    collection.addEventListener('input', handleCollectionInput);
+    collection.addEventListener('change', handleCollectionInput);
+  });
+}
+
+function setupSectionObserver() {
+  if (sectionObserver) {
+    sectionObserver.disconnect();
+  }
+  const sections = Array.from(document.querySelectorAll('.admin-main .admin-card[id]'));
+  if (!sections.length) return;
+  elements.sectionLinks = Array.from(document.querySelectorAll('.admin-sidebar__nav a[href^="#"]'));
+  if (!elements.sectionLinks?.length) return;
+
+  sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        setActiveSection(entry.target.id);
+      }
+    });
+  }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+
+  sections.forEach((section) => sectionObserver.observe(section));
+  if (sections[0]) {
+    setActiveSection(sections[0].id);
+  }
+}
+
+function setActiveSection(id) {
+  if (!elements.sectionLinks) return;
+  elements.sectionLinks.forEach((link) => {
+    if (link.getAttribute('href') === `#${id}`) {
+      link.setAttribute('aria-current', 'true');
+    } else {
+      link.removeAttribute('aria-current');
+    }
   });
 }
 
@@ -78,14 +162,18 @@ async function loadContent() {
     const data = await response.json();
     state.data = data;
     state.snapshot = JSON.stringify(data);
-    state.dirty = false;
     populateForm();
-    elements.jsonStatus.textContent = 'Content loaded successfully.';
-    elements.jsonStatus.className = 'admin-status admin-status--success';
+    setDirty(false);
+    if (elements.jsonStatus) {
+      elements.jsonStatus.textContent = 'Content loaded successfully.';
+      elements.jsonStatus.className = 'admin-status admin-status--success';
+    }
   } catch (error) {
     console.error(error);
-    elements.jsonStatus.textContent = 'Failed to load site data. Check the server logs.';
-    elements.jsonStatus.className = 'admin-status admin-status--error';
+    if (elements.jsonStatus) {
+      elements.jsonStatus.textContent = 'Failed to load site data. Check the server logs.';
+      elements.jsonStatus.className = 'admin-status admin-status--error';
+    }
   }
 }
 
@@ -93,11 +181,14 @@ function populateForm() {
   if (!state.data) return;
   document.querySelectorAll('[data-path]').forEach((field) => {
     const path = field.dataset.path;
+    if (!path) return;
     const value = getValue(path);
     if (field.matches('[data-json]')) {
       field.value = value ? JSON.stringify(value, null, 2) : '';
     } else if (field.type === 'color') {
       field.value = toColorValue(value);
+    } else if (field.type === 'checkbox') {
+      field.checked = Boolean(value);
     } else if (field.tagName === 'TEXTAREA') {
       field.value = value ?? '';
     } else {
@@ -105,21 +196,22 @@ function populateForm() {
     }
     field.setCustomValidity('');
   });
+  renderCollections();
   updateDesignPreview();
   updateJsonEditor();
 }
 
 function handleFieldChange(field) {
-  const path = field.dataset.path;
-  if (!path) return;
-  let value = field.value;
+  const path = field?.dataset?.path;
+  if (!path || !state.data) return;
+  let value = field.type === 'checkbox' ? field.checked : field.value;
   if (field.matches('[data-json]')) {
-    if (!value.trim()) {
+    if (!String(field.value).trim()) {
       setValue(path, []);
       field.setCustomValidity('');
     } else {
       try {
-        const parsed = JSON.parse(value);
+        const parsed = JSON.parse(field.value);
         setValue(path, parsed);
         field.setCustomValidity('');
       } catch (error) {
@@ -130,22 +222,153 @@ function handleFieldChange(field) {
     }
   } else if (field.type === 'color') {
     setValue(path, value || '#000000');
+  } else if (field.type === 'number') {
+    const numeric = field.value.trim();
+    setValue(path, numeric === '' ? null : Number(numeric));
   } else {
     setValue(path, value);
   }
-  state.dirty = true;
+  setDirty(true);
   updateJsonEditor({ silent: true });
-  if (path.startsWith('design.colors') || path.startsWith('design.fonts') || path === 'design.customCss') {
+  if (path.startsWith('design.colors') || path.startsWith('design.fonts') || path.startsWith('design.customCss')) {
     updateDesignPreview();
   }
 }
 
+function renderCollections() {
+  if (!state.data) return;
+  document.querySelectorAll('[data-collection]').forEach((collection) => {
+    const path = collection.dataset.collection;
+    if (!path) return;
+    const itemsContainer = collection.querySelector('[data-collection-items]');
+    const template = collection.querySelector('template[data-collection-template]');
+    if (!itemsContainer || !template) return;
+
+    const items = getValue(path);
+    const list = Array.isArray(items) ? items : [];
+    itemsContainer.innerHTML = '';
+    list.forEach((item, index) => {
+      const fragment = template.content.cloneNode(true);
+      const root = fragment.querySelector('[data-collection-item]') || fragment.firstElementChild;
+      if (!root) return;
+      root.dataset.index = index;
+      fillCollectionItem(root, item);
+      itemsContainer.appendChild(fragment);
+    });
+
+    const emptyState = collection.querySelector('[data-collection-empty]');
+    if (emptyState) {
+      emptyState.hidden = list.length > 0;
+    }
+
+    if (collection.dataset.focusIndex != null) {
+      const focusIndex = Number(collection.dataset.focusIndex);
+      requestAnimationFrame(() => {
+        const focusTarget = collection.querySelector(`[data-collection-item][data-index="${focusIndex}"] input, [data-collection-item][data-index="${focusIndex}"] textarea`);
+        focusTarget?.focus();
+        delete collection.dataset.focusIndex;
+      });
+    }
+  });
+}
+
+function fillCollectionItem(root, item) {
+  root.querySelectorAll('[data-field]').forEach((field) => {
+    const key = field.dataset.field;
+    const value = getDeepValue(item, key);
+    if (field.type === 'checkbox') {
+      field.checked = Boolean(value);
+    } else {
+      field.value = value ?? '';
+    }
+  });
+}
+
+function handleCollectionClick(event) {
+  const button = event.target.closest('[data-action]');
+  if (!button) return;
+  const collection = event.currentTarget;
+  const action = button.dataset.action;
+  const path = collection.dataset.collection;
+  if (!path) return;
+
+  if (action === 'add-item') {
+    const defaults = parseCollectionDefault(collection);
+    const list = getCollectionList(path);
+    list.push(defaults);
+    setValue(path, list);
+    collection.dataset.focusIndex = String(list.length - 1);
+    setDirty(true);
+    updateJsonEditor({ silent: true });
+    renderCollections();
+  }
+
+  if (action === 'remove-item') {
+    const item = button.closest('[data-collection-item]');
+    if (!item) return;
+    const index = Number(item.dataset.index);
+    const list = getCollectionList(path);
+    list.splice(index, 1);
+    setValue(path, list);
+    setDirty(true);
+    updateJsonEditor({ silent: true });
+    renderCollections();
+  }
+}
+
+function handleCollectionInput(event) {
+  const field = event.target;
+  if (!field.dataset.field) return;
+  const collection = event.currentTarget;
+  const path = collection.dataset.collection;
+  if (!path) return;
+  const itemRoot = field.closest('[data-collection-item]');
+  if (!itemRoot) return;
+  const index = Number(itemRoot.dataset.index);
+  const list = getCollectionList(path);
+  const item = list[index] || {};
+  setDeepValue(item, field.dataset.field, parseFieldValue(field));
+  list[index] = item;
+  setValue(path, list);
+  setDirty(true);
+  updateJsonEditor({ silent: true });
+}
+
+function parseCollectionDefault(collection) {
+  const raw = collection.dataset.default;
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw);
+  } catch (error) {
+    console.warn('Invalid collection default', error);
+    return {};
+  }
+}
+
+function getCollectionList(path) {
+  const value = getValue(path);
+  const list = Array.isArray(value) ? value : [];
+  return clone(list);
+}
+
+function parseFieldValue(field) {
+  if (field.type === 'checkbox') {
+    return field.checked;
+  }
+  if (field.type === 'number') {
+    const numeric = field.value.trim();
+    return numeric === '' ? null : Number(numeric);
+  }
+  return field.value;
+}
+
 function updateJsonEditor(options = {}) {
   if (!elements.jsonEditor || !state.data) return;
+  const { silent } = options;
   const previousSelectionStart = elements.jsonEditor.selectionStart;
   const previousSelectionEnd = elements.jsonEditor.selectionEnd;
   elements.jsonEditor.value = JSON.stringify(state.data, null, 2);
-  if (options.silent) {
+  if (silent) {
     elements.jsonEditor.selectionStart = previousSelectionStart;
     elements.jsonEditor.selectionEnd = previousSelectionEnd;
   }
@@ -156,11 +379,15 @@ function formatJsonEditor() {
   try {
     const parsed = JSON.parse(elements.jsonEditor.value);
     elements.jsonEditor.value = JSON.stringify(parsed, null, 2);
-    elements.jsonStatus.textContent = 'JSON formatted.';
-    elements.jsonStatus.className = 'admin-status';
+    if (elements.jsonStatus) {
+      elements.jsonStatus.textContent = 'JSON formatted.';
+      elements.jsonStatus.className = 'admin-status';
+    }
   } catch (error) {
-    elements.jsonStatus.textContent = 'Cannot format invalid JSON.';
-    elements.jsonStatus.className = 'admin-status admin-status--error';
+    if (elements.jsonStatus) {
+      elements.jsonStatus.textContent = 'Cannot format invalid JSON.';
+      elements.jsonStatus.className = 'admin-status admin-status--error';
+    }
   }
 }
 
@@ -205,6 +432,11 @@ function getValue(path) {
   return path.split('.').reduce((acc, segment) => (acc ? acc[segment] : undefined), state.data);
 }
 
+function getDeepValue(object, path) {
+  if (!object || !path) return undefined;
+  return path.split('.').reduce((acc, segment) => (acc ? acc[segment] : undefined), object);
+}
+
 function setValue(path, value) {
   if (!state.data || !path) return;
   const segments = path.split('.');
@@ -218,24 +450,42 @@ function setValue(path, value) {
   target[segments.at(-1)] = value;
 }
 
+function setDeepValue(target, path, value) {
+  if (!target || !path) return;
+  const segments = path.split('.');
+  let current = target;
+  segments.slice(0, -1).forEach((segment) => {
+    if (typeof current[segment] !== 'object' || current[segment] === null) {
+      current[segment] = {};
+    }
+    current = current[segment];
+  });
+  current[segments.at(-1)] = value;
+}
+
 async function saveFromJsonEditor() {
   if (!elements.jsonEditor) return;
   try {
     const parsed = JSON.parse(elements.jsonEditor.value);
     await saveData(parsed);
   } catch (error) {
-    elements.jsonStatus.textContent = 'Cannot save: JSON is invalid.';
-    elements.jsonStatus.className = 'admin-status admin-status--error';
+    if (elements.jsonStatus) {
+      elements.jsonStatus.textContent = 'Cannot save: JSON is invalid.';
+      elements.jsonStatus.className = 'admin-status admin-status--error';
+    }
   }
 }
 
 async function saveData(nextData) {
   if (!state.token) {
-    elements.tokenStatus.textContent = 'Set an admin token before saving.';
-    elements.tokenStatus.className = 'admin-status admin-status--error';
+    if (elements.tokenStatus) {
+      elements.tokenStatus.textContent = 'Set an admin token before saving.';
+      elements.tokenStatus.className = 'admin-status admin-status--error';
+    }
     return;
   }
   try {
+    setSaving(true);
     const response = await fetch('/api/site', {
       method: 'PUT',
       headers: {
@@ -250,14 +500,80 @@ async function saveData(nextData) {
     }
     state.data = nextData;
     state.snapshot = JSON.stringify(nextData);
-    state.dirty = false;
     populateForm();
-    elements.jsonStatus.textContent = 'Changes saved successfully.';
-    elements.jsonStatus.className = 'admin-status admin-status--success';
+    setDirty(false);
+    if (elements.jsonStatus) {
+      elements.jsonStatus.textContent = 'Changes saved successfully.';
+      elements.jsonStatus.className = 'admin-status admin-status--success';
+    }
   } catch (error) {
     console.error(error);
-    elements.jsonStatus.textContent = error.message || 'Save failed. Check your token and try again.';
-    elements.jsonStatus.className = 'admin-status admin-status--error';
+    if (elements.jsonStatus) {
+      elements.jsonStatus.textContent = error.message || 'Save failed. Check your token and try again.';
+      elements.jsonStatus.className = 'admin-status admin-status--error';
+    }
+  } finally {
+    setSaving(false);
+  }
+}
+
+function restoreSnapshot() {
+  if (!state.snapshot) return;
+  const confirmed = confirm('Reset all unsaved changes?');
+  if (!confirmed) return;
+  try {
+    const parsed = JSON.parse(state.snapshot);
+    state.data = parsed;
+    populateForm();
+    setDirty(false);
+    if (elements.jsonStatus) {
+      elements.jsonStatus.textContent = 'Changes reverted to last saved version.';
+      elements.jsonStatus.className = 'admin-status';
+    }
+  } catch (error) {
+    console.error(error);
+    if (elements.jsonStatus) {
+      elements.jsonStatus.textContent = 'Unable to reset changes.';
+      elements.jsonStatus.className = 'admin-status admin-status--error';
+    }
+  }
+}
+
+function setDirty(isDirty) {
+  state.dirty = Boolean(isDirty);
+  if (elements.unsavedIndicator) {
+    elements.unsavedIndicator.hidden = !state.dirty;
+  }
+  updatePublishButton();
+}
+
+function setSaving(isSaving) {
+  state.saving = Boolean(isSaving);
+  updatePublishButton();
+}
+
+function updatePublishButton() {
+  if (!elements.publishChanges) return;
+  elements.publishChanges.disabled = state.saving || !state.dirty;
+  elements.publishChanges.setAttribute('aria-busy', state.saving ? 'true' : 'false');
+  elements.publishChanges.textContent = state.saving ? 'Saving…' : state.publishLabel;
+}
+
+/**
+ * Deep clones a value. Uses structuredClone if available, otherwise falls back to JSON methods.
+ * Limitations of the fallback: functions, undefined values, and circular references are not supported.
+ * If the fallback fails, an error is thrown.
+ */
+function clone(value) {
+  if (typeof structuredClone === 'function') {
+    return structuredClone(value);
+  }
+  try {
+    return JSON.parse(JSON.stringify(value));
+  } catch (error) {
+    throw new Error('Fallback clone failed: ' +
+      'Objects with functions, undefined values, or circular references cannot be cloned. ' +
+      error.message);
   }
 }
 

@@ -197,6 +197,32 @@
   margin-bottom: 2rem;
 }
 
+.cart__note--payment,
+.cart__note--cms {
+  margin-bottom: 1.25rem;
+}
+
+.cart__integrations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.cart__integrations[hidden] {
+  display: none;
+}
+
+.button--stripe {
+  background: linear-gradient(135deg, #635bff, #7c3aed);
+  box-shadow: 0 18px 34px rgba(99, 91, 255, 0.28);
+  color: #fff;
+}
+
+.cart__integrations [hidden] {
+  display: none !important;
+}
+
 .cart__items {
   list-style: none;
   padding: 0;

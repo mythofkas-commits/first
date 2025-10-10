@@ -102,6 +102,8 @@
         <div class="cart__summary">
           <h2 id="cart-heading">Your booking</h2>
           <p class="cart__note" data-content="order.checkout.instructions">Select services to build your appointment request. You can review or remove items before submitting.</p>
+          <p class="cart__note cart__note--payment" data-content="order.checkout.paymentNote" hidden></p>
+          <p class="cart__note cart__note--cms" data-content="order.checkout.cms.note" hidden></p>
           <ul class="cart__items" aria-live="polite"></ul>
           <dl class="cart__totals">
             <div>
@@ -114,6 +116,10 @@
             </div>
           </dl>
           <button class="button" id="start-checkout" type="button" data-content="order.checkout.cta">Proceed to checkout</button>
+          <div class="cart__integrations">
+            <a class="button button--stripe" data-role="stripe-button" target="_blank" rel="noopener" hidden>Pay &amp; reserve with Stripe</a>
+            <a class="button button--ghost" data-role="cms-dashboard" target="_blank" rel="noopener" hidden>Open booking CMS</a>
+          </div>
           <p class="cart__disclaimer">Requests are reviewed during business hours. We’ll reach out to confirm, secure a card on file, and answer any questions.</p>
         </div>
         <form class="cart__form" aria-label="Guest details">
