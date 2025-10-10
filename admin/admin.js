@@ -194,6 +194,7 @@ const elements = {
   publishChanges: document.getElementById('publish-changes'),
   unsavedIndicator: document.getElementById('unsaved-indicator'),
   designPreview: document.getElementById('design-preview'),
+  designMockup: document.getElementById('design-mockup'),
   jsonEditor: document.getElementById('json-editor'),
   jsonStatus: document.getElementById('json-status'),
   formatJson: document.getElementById('format-json'),
@@ -239,6 +240,48 @@ function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
+function enhanceFields() {
+  document.querySelectorAll('[data-path]').forEach((field) => {
+    if (!field || field.dataset.enhanced === 'true') {
+      updateFieldUi(field);
+      return;
+    }
+    const container = field.closest('.admin-field');
+    if (!container) return;
+
+    const control = document.createElement('div');
+    control.className = 'admin-field__control';
+    const inputWrapper = document.createElement('div');
+    inputWrapper.className = 'admin-field__input';
+
+    inputWrapper.appendChild(field);
+    control.appendChild(inputWrapper);
+
+    if (field.type === 'color') {
+      const swatch = document.createElement('span');
+      swatch.className = 'admin-field__swatch';
+      swatch.dataset.fieldSwatch = 'true';
+      inputWrapper.appendChild(swatch);
+    }
+
+    const resetButton = document.createElement('button');
+    resetButton.type = 'button';
+    resetButton.className = 'admin-chip admin-field__reset';
+    resetButton.textContent = 'Reset';
+    resetButton.title = 'Reset to saved value';
+    resetButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      resetField(field);
+    });
+
+    control.appendChild(resetButton);
+    container.appendChild(control);
+    field.dataset.enhanced = 'true';
+    updateFieldUi(field);
+  });
+}
+
 async function init() {
   if (elements.tokenInput) {
     elements.tokenInput.value = state.token;
@@ -246,6 +289,7 @@ async function init() {
   if (elements.publishChanges) {
     state.publishLabel = elements.publishChanges.textContent.trim() || state.publishLabel;
   }
+  enhanceFields();
   attachEventListeners();
   setupCollections();
   setupSectionObserver();
@@ -440,10 +484,131 @@ function populateForm() {
       field.value = value ?? '';
     }
     field.setCustomValidity('');
+    updateFieldUi(field);
   });
   renderCollections();
   updateDesignPreview();
   updateJsonEditor();
+}
+
+function resetField(field) {
+  if (!field) return;
+  const path = field.dataset?.path;
+  if (!path) return;
+  const baseline = getBaselineValue(path);
+  if (field.matches('[data-json]')) {
+    if (baseline == null) {
+      field.value = '';
+    } else {
+      field.value = JSON.stringify(baseline, null, 2);
+    }
+    field.setCustomValidity('');
+  } else if (field.type === 'checkbox') {
+    field.checked = Boolean(baseline);
+  } else if (field.type === 'color') {
+    const fallback = typeof baseline === 'string' && baseline ? baseline : '#000000';
+    field.value = toColorValue(fallback);
+  } else if (field.type === 'number') {
+    field.value = baseline === null || baseline === undefined ? '' : baseline;
+  } else {
+    field.value = baseline ?? '';
+  }
+  handleFieldChange(field);
+}
+
+function getBaselineValue(path) {
+  if (!path) return undefined;
+  const snapshotValue = state.snapshot ? getDeepValue(state.snapshot, path) : undefined;
+  if (snapshotValue !== undefined) {
+    return snapshotValue;
+  }
+  return getDeepValue(DEFAULT_DATA, path);
+}
+
+function normalizeFieldValue(field, value) {
+  if (!field) return value;
+  if (field.matches('[data-json]')) {
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (!trimmed) return '';
+      try {
+        return JSON.stringify(JSON.parse(trimmed));
+      } catch (error) {
+        return trimmed;
+      }
+    }
+    if (value == null) return '';
+    try {
+      return JSON.stringify(value);
+    } catch (error) {
+      return '';
+    }
+  }
+  if (field.type === 'checkbox') {
+    return value ? 'true' : 'false';
+  }
+  if (field.type === 'number') {
+    if (value === '' || value === null || value === undefined) return '';
+    const numeric = Number(value);
+    return Number.isNaN(numeric) ? '' : numeric;
+  }
+  if (field.type === 'color') {
+    if (typeof value !== 'string' || !value.trim()) {
+      return '#000000';
+    }
+    return toColorValue(value).toLowerCase();
+  }
+  if (value === null || value === undefined) return '';
+  return String(value);
+}
+
+function updateFieldUi(field) {
+  if (!field) return;
+  const container = field.closest('.admin-field');
+  if (!container) return;
+
+  if (field.type === 'color') {
+    const swatch = container.querySelector('[data-field-swatch]');
+    if (swatch) {
+      const color = toColorValue(field.value || '#000000');
+      swatch.textContent = color.toUpperCase();
+      swatch.style.background = color;
+      swatch.style.color = getReadableTextColor(color);
+    }
+  }
+
+  const resetButton = container.querySelector('.admin-field__reset');
+  if (resetButton) {
+    const path = field.dataset?.path;
+    if (!path) {
+      resetButton.disabled = false;
+      resetButton.setAttribute('aria-disabled', 'false');
+      return;
+    }
+    const baseline = getBaselineValue(path);
+    const normalizedBaseline = normalizeFieldValue(field, baseline);
+    const normalizedCurrent = normalizeFieldValue(field, field.type === 'checkbox' ? field.checked : field.value);
+    const unchanged = normalizedBaseline === normalizedCurrent;
+    resetButton.disabled = unchanged;
+    resetButton.setAttribute('aria-disabled', unchanged ? 'true' : 'false');
+  }
+}
+
+function refreshDirtyState() {
+  if (!state.snapshot) {
+    setDirty(true);
+    return;
+  }
+  setDirty(!isEqual(state.data, state.snapshot));
+}
+
+function isEqual(a, b) {
+  if (a === b) return true;
+  try {
+    return JSON.stringify(a) === JSON.stringify(b);
+  } catch (error) {
+    return false;
+  }
 }
 
 function handleFieldChange(field) {
@@ -473,7 +638,8 @@ function handleFieldChange(field) {
   } else {
     setValue(path, value);
   }
-  setDirty(true);
+  updateFieldUi(field);
+  refreshDirtyState();
   updateJsonEditor({ silent: true });
   if (path.startsWith('design.colors') || path.startsWith('design.fonts') || path.startsWith('design.customCss')) {
     updateDesignPreview();
@@ -543,7 +709,7 @@ function handleCollectionClick(event) {
     list.push(defaults);
     setValue(path, list);
     collection.dataset.focusIndex = String(list.length - 1);
-    setDirty(true);
+    refreshDirtyState();
     updateJsonEditor({ silent: true });
     renderCollections();
   }
@@ -555,7 +721,7 @@ function handleCollectionClick(event) {
     const list = getCollectionList(path);
     list.splice(index, 1);
     setValue(path, list);
-    setDirty(true);
+    refreshDirtyState();
     updateJsonEditor({ silent: true });
     renderCollections();
   }
@@ -575,7 +741,7 @@ function handleCollectionInput(event) {
   setDeepValue(item, field.dataset.field, parseFieldValue(field));
   list[index] = item;
   setValue(path, list);
-  setDirty(true);
+  refreshDirtyState();
   updateJsonEditor({ silent: true });
 }
 
@@ -637,20 +803,58 @@ function formatJsonEditor() {
 }
 
 function updateDesignPreview() {
-  if (!elements.designPreview) return;
   const colors = state.data?.design?.colors || {};
-  const keys = Object.keys(colors);
-  if (!keys.length) {
-    elements.designPreview.innerHTML = '<p class="admin-status">Add colors to see a preview.</p>';
-    return;
+  const palette = {
+    primary: colors.primary || '#7c3aed',
+    primaryDark: colors.primaryDark || colors.primary || '#5b21b6',
+    accent: colors.accent || '#f472b6',
+    background: colors.background || '#f5f5fb',
+    surface: colors.surface || '#ffffff',
+    text: colors.text || '#0f172a',
+    muted: colors.muted || '#64748b',
+    border: colors.border || 'rgba(15, 23, 42, 0.14)',
+  };
+
+  if (elements.designMockup) {
+    const headingFont = (state.data?.design?.fonts?.heading || '').trim();
+    const bodyFont = (state.data?.design?.fonts?.body || '').trim();
+    const customProperties = {
+      '--preview-primary': palette.primary,
+      '--preview-accent': palette.accent,
+      '--preview-text': palette.text,
+      '--preview-muted': palette.muted,
+      '--preview-surface': palette.surface,
+      '--preview-background': palette.background,
+      '--preview-border': palette.border,
+      '--preview-heading-font': headingFont || 'inherit',
+      '--preview-body-font': bodyFont || 'inherit',
+    };
+    Object.entries(customProperties).forEach(([property, value]) => {
+      elements.designMockup.style.setProperty(property, value);
+    });
   }
-  elements.designPreview.innerHTML = keys
-    .map((key) => {
-      const hex = colors[key];
-      const textColor = getReadableTextColor(hex);
-      return `<div class="admin-preview__swatch" style="background:${hex};color:${textColor}"><span>${key}<br>${hex}</span></div>`;
+
+  if (!elements.designPreview) return;
+  const order = ['primary', 'primaryDark', 'accent', 'background', 'surface', 'text', 'muted', 'border'];
+  let customCount = 0;
+  const swatches = order
+    .map((token) => {
+      const hex = palette[token];
+      if (!hex) return '';
+      const readable = getReadableTextColor(hex);
+      const label = token.replace(/([A-Z])/g, ' $1').trim();
+      const isCustom = typeof colors[token] === 'string' && colors[token].trim() !== '';
+      if (isCustom) {
+        customCount += 1;
+      }
+      const classes = ['admin-preview__swatch', isCustom ? 'admin-preview__swatch--active' : 'admin-preview__swatch--default'];
+      return `<div class="${classes.join(' ')}" data-color-token="${token}" style="background:${hex};color:${readable}"><span>${label}<br>${hex}</span></div>`;
     })
     .join('');
+  const message = customCount === 0
+    ? '<div class="admin-preview__message"><p class="admin-status">Using default palette. Update a swatch to customize the theme.</p></div>'
+    : '';
+  elements.designPreview.innerHTML = `${message}${swatches}`;
 }
 
 function toColorValue(value) {
@@ -764,8 +968,13 @@ function restoreSnapshot() {
   const confirmed = confirm('Reset all unsaved changes?');
   if (!confirmed) return;
   try {
-    const parsed = JSON.parse(state.snapshot);
-    applyData(parsed, { snapshotSource: parsed });
+    let snapshot;
+    if (typeof state.snapshot === 'string') {
+      snapshot = clone(JSON.parse(state.snapshot));
+    } else {
+      snapshot = clone(state.snapshot);
+    }
+    applyData(snapshot, { snapshotSource: state.snapshot });
     if (elements.jsonStatus) {
       elements.jsonStatus.textContent = 'Changes reverted to last saved version.';
       elements.jsonStatus.className = 'admin-status';
