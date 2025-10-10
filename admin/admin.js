@@ -968,7 +968,12 @@ function restoreSnapshot() {
   const confirmed = confirm('Reset all unsaved changes?');
   if (!confirmed) return;
   try {
-    const snapshot = clone(state.snapshot);
+    let snapshot;
+    if (typeof state.snapshot === 'string') {
+      snapshot = clone(JSON.parse(state.snapshot));
+    } else {
+      snapshot = clone(state.snapshot);
+    }
     applyData(snapshot, { snapshotSource: state.snapshot });
     if (elements.jsonStatus) {
       elements.jsonStatus.textContent = 'Changes reverted to last saved version.';
