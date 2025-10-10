@@ -110,28 +110,6 @@ const DEFAULT_DATA = {
       mapEmbed: '',
       details: [],
     },
-    checkout: {
-      mode: 'form',
-      cta: '',
-      instructions: '',
-      submitMessage: '',
-      paymentNote: '',
-      stripe: {
-        enabled: false,
-        publishableKey: '',
-        priceId: '',
-        checkoutLink: '',
-        successUrl: '',
-        cancelUrl: '',
-        buttonLabel: '',
-        supportEmail: '',
-      },
-      cms: {
-        note: '',
-        dashboardUrl: '',
-        buttonLabel: '',
-      },
-    },
     footer: {
       note: '',
     },
