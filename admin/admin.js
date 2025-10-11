@@ -182,6 +182,11 @@ const state = {
   dirty: false,
   saving: false,
   publishLabel: 'Publish changes',
+  activePreviewRegion: 'site.identity',
+  previewScale: localStorage.getItem('adminPreviewScale') || 'desktop',
+  previewWidth: Number(localStorage.getItem('adminPreviewWidth')) || 1080,
+  previewReady: false,
+  previewQueue: [],
 };
 
 const elements = {
@@ -195,11 +200,38 @@ const elements = {
   unsavedIndicator: document.getElementById('unsaved-indicator'),
   designPreview: document.getElementById('design-preview'),
   designMockup: document.getElementById('design-mockup'),
+  previewFrame: document.querySelector('[data-preview-frame]'),
+  previewViewport: document.querySelector('[data-preview-viewport]'),
+  previewStatus: document.getElementById('preview-status'),
+  previewScaleButtons: Array.from(document.querySelectorAll('[data-preview-scale]')),
+  previewLoading: document.querySelector('[data-preview-loading]'),
+  previewWidthControl: document.querySelector('[data-preview-width]'),
+  previewWidthValue: document.querySelector('[data-preview-width-value]'),
   jsonEditor: document.getElementById('json-editor'),
   jsonStatus: document.getElementById('json-status'),
   formatJson: document.getElementById('format-json'),
   resetJson: document.getElementById('reset-json'),
   saveJson: document.getElementById('save-json'),
+};
+
+const PREVIEW_REGION_LABELS = {
+  'site.overview': 'Administrator access',
+  'site.identity': 'Site identity & contact',
+  'site.navigation': 'Navigation & links',
+  design: 'Design studio',
+  'homepage.hero': 'Homepage hero',
+  'homepage.sections': 'Homepage sections',
+  order: 'Booking & services',
+  integrations: 'Integrations',
+  pages: 'Custom pages',
+  advanced: 'Advanced JSON editor',
+};
+
+const PREVIEW_SCALES = ['desktop', 'tablet', 'mobile'];
+const PREVIEW_SCALE_WIDTHS = {
+  desktop: 1200,
+  tablet: 834,
+  mobile: 414,
 };
 
 let sectionObserver;
@@ -240,6 +272,194 @@ function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
+function escapeSelector(value) {
+  if (typeof value !== 'string') return '';
+  if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+    return CSS.escape(value);
+  }
+  return value.replace(/([ #;?%&,.+*~':"!^$\[\]()=>|\/])/g, '\\$1');
+}
+
+function renderLivePreview() {
+  if (!state.data) return;
+  const snapshot = clone(state.data || getDefaultData());
+  queuePreviewMessage('preview:update', { data: snapshot });
+}
+
+function highlightPreviewRegion(region, options = {}) {
+  const { persist = false, preserveStatus = false, fromPreview = false, scroll = false } = options;
+  const cards = document.querySelectorAll('.admin-card[data-preview-region]');
+  let matched = false;
+  cards.forEach((card) => {
+    const tokens = String(card.dataset.previewRegion || '')
+      .split(/\s+/)
+      .filter(Boolean);
+    const isActive = region && tokens.some((token) => token === region || region.startsWith(token) || token.startsWith(region));
+    card.classList.toggle('admin-card--active', isActive);
+    if (isActive && !matched) {
+      matched = true;
+    }
+  });
+  if (persist && region) {
+    state.activePreviewRegion = region;
+  }
+  if (elements.previewStatus && !preserveStatus) {
+    const label = PREVIEW_REGION_LABELS[region] || 'Live site preview';
+    elements.previewStatus.textContent = label;
+  }
+  if (!fromPreview && region) {
+    queuePreviewMessage('preview:highlight', { region, scroll: Boolean(scroll) });
+  }
+  if (!matched && region && persist) {
+    state.activePreviewRegion = region;
+  }
+}
+
+function postPreviewMessage(message) {
+  const frameWindow = elements.previewFrame?.contentWindow;
+  if (!frameWindow) return;
+  try {
+    frameWindow.postMessage(message, '*');
+  } catch (error) {
+    // ignore cross-frame failures
+  }
+}
+
+function queuePreviewMessage(type, payload = {}) {
+  if (!elements.previewFrame) return;
+  const message = { type, ...payload };
+  if (!state.previewReady && type !== 'preview:request-state') {
+    state.previewQueue.push(message);
+    return;
+  }
+  postPreviewMessage(message);
+}
+
+function flushPreviewQueue() {
+  if (!state.previewReady || !state.previewQueue?.length) return;
+  const queue = state.previewQueue.slice();
+  state.previewQueue = [];
+  queue.forEach((message) => postPreviewMessage(message));
+}
+
+function updatePreviewWidth(width, options = {}) {
+  if (!elements.previewViewport) return;
+  const min = 360;
+  const max = 1440;
+  const numeric = Math.min(Math.max(Math.round(Number(width) || state.previewWidth || 1080), min), max);
+  elements.previewViewport.style.setProperty('--preview-width', `${numeric}px`);
+  if (elements.previewWidthValue) {
+    elements.previewWidthValue.textContent = `${numeric}px`;
+  }
+  if (elements.previewWidthControl && !options.silentInput) {
+    elements.previewWidthControl.value = String(numeric);
+  }
+  if (options.persist !== false) {
+    state.previewWidth = numeric;
+    localStorage.setItem('adminPreviewWidth', String(numeric));
+  } else {
+    state.previewWidth = numeric;
+  }
+  if (!options.skipMessage) {
+    queuePreviewMessage('preview:resize', { width: numeric });
+  }
+}
+
+function findSectionForRegion(region) {
+  if (!region) return null;
+  const selector = escapeSelector(region);
+  if (!selector) return null;
+  return document.querySelector(`.admin-card[data-preview-region="${selector}"]`);
+}
+
+function focusPreviewRegion(region) {
+  const target = findSectionForRegion(region);
+  if (!target) return;
+  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  requestAnimationFrame(() => {
+    target.focus({ preventScroll: true });
+  });
+}
+
+function setupPreviewInteractions() {
+  const sections = document.querySelectorAll('.admin-card[data-preview-region]');
+  sections.forEach((section) => {
+    section.addEventListener('focusin', () => {
+      const region = section.dataset.previewRegion;
+      if (region) {
+        highlightPreviewRegion(region, { persist: true, scroll: true });
+      }
+    });
+    section.addEventListener('mouseenter', () => {
+      const region = section.dataset.previewRegion;
+      if (region) {
+        highlightPreviewRegion(region, { persist: false });
+      }
+    });
+    section.addEventListener('mouseleave', () => {
+      if (state.activePreviewRegion) {
+        highlightPreviewRegion(state.activePreviewRegion, { persist: true, preserveStatus: true });
+      }
+    });
+  });
+}
+
+function handlePreviewMessage(event) {
+  if (event.source !== elements.previewFrame?.contentWindow) return;
+  const message = event?.data;
+  if (!message || typeof message !== 'object') return;
+  switch (message.type) {
+    case 'preview:ready':
+      state.previewReady = true;
+      if (elements.previewLoading) {
+        elements.previewLoading.hidden = true;
+      }
+      flushPreviewQueue();
+      renderLivePreview();
+      highlightPreviewRegion(state.activePreviewRegion || 'site.identity', {
+        persist: true,
+        preserveStatus: true,
+        fromPreview: true,
+      });
+      updatePreviewWidth(state.previewWidth, { persist: false, silentInput: true, skipMessage: true });
+      break;
+    case 'preview:focus':
+      if (message.region) {
+        highlightPreviewRegion(message.region, { persist: true, fromPreview: true });
+        focusPreviewRegion(message.region);
+      }
+      break;
+    case 'preview:region-change':
+      if (message.region) {
+        highlightPreviewRegion(message.region, { persist: true, fromPreview: true });
+      }
+      break;
+    default:
+      break;
+  }
+}
+
+function setPreviewScale(scale, options = {}) {
+  if (!elements.previewViewport) return;
+  const nextScale = PREVIEW_SCALES.includes(scale) ? scale : 'custom';
+  elements.previewViewport.dataset.scale = nextScale;
+  elements.previewScaleButtons?.forEach((button) => {
+    const isActive = button.dataset.previewScale === nextScale;
+    button.dataset.active = isActive ? 'true' : 'false';
+    button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
+  if (options.persist !== false) {
+    state.previewScale = nextScale;
+    localStorage.setItem('adminPreviewScale', nextScale);
+  }
+  if (nextScale === 'custom') {
+    return;
+  }
+  const width = PREVIEW_SCALE_WIDTHS[nextScale];
+  if (width) {
+    updatePreviewWidth(width, { persist: options.persist !== false, silentInput: options.silentInput });
+  }
+}
 function enhanceFields() {
   document.querySelectorAll('[data-path]').forEach((field) => {
     if (!field || field.dataset.enhanced === 'true') {
@@ -289,10 +509,19 @@ async function init() {
   if (elements.publishChanges) {
     state.publishLabel = elements.publishChanges.textContent.trim() || state.publishLabel;
   }
+  if (elements.previewLoading) {
+    elements.previewLoading.hidden = false;
+  }
   enhanceFields();
   attachEventListeners();
   setupCollections();
   setupSectionObserver();
+  setupPreviewInteractions();
+  window.addEventListener('message', handlePreviewMessage);
+  setPreviewScale(state.previewScale || 'desktop', { persist: false, silentInput: true });
+  if ((state.previewScale || 'desktop') === 'custom') {
+    updatePreviewWidth(state.previewWidth, { persist: false });
+  }
   await loadContent();
 }
 
@@ -337,6 +566,19 @@ function attachEventListeners() {
   fields.forEach((field) => {
     field.addEventListener('input', (event) => handleFieldChange(event.target));
     field.addEventListener('change', (event) => handleFieldChange(event.target));
+  });
+
+  elements.previewScaleButtons?.forEach((button) => {
+    button.addEventListener('click', () => {
+      const scale = button.dataset.previewScale || 'desktop';
+      setPreviewScale(scale);
+    });
+  });
+
+  elements.previewWidthControl?.addEventListener('input', (event) => {
+    const width = Number(event.target.value);
+    updatePreviewWidth(width, { persist: true, silentInput: true });
+    setPreviewScale('custom', { persist: true, silentInput: true });
   });
 
   elements.jsonEditor?.addEventListener('input', () => {
@@ -408,6 +650,11 @@ function setActiveSection(id) {
       link.removeAttribute('aria-current');
     }
   });
+  const section = document.getElementById(id);
+  const region = section?.dataset?.previewRegion;
+  if (region) {
+    highlightPreviewRegion(region, { persist: true, scroll: true });
+  }
 }
 
 async function loadContent() {
@@ -489,6 +736,7 @@ function populateForm() {
   renderCollections();
   updateDesignPreview();
   updateJsonEditor();
+  renderLivePreview();
 }
 
 function resetField(field) {
@@ -644,6 +892,7 @@ function handleFieldChange(field) {
   if (path.startsWith('design.colors') || path.startsWith('design.fonts') || path.startsWith('design.customCss')) {
     updateDesignPreview();
   }
+  renderLivePreview();
 }
 
 function renderCollections() {
@@ -712,6 +961,7 @@ function handleCollectionClick(event) {
     refreshDirtyState();
     updateJsonEditor({ silent: true });
     renderCollections();
+    renderLivePreview();
   }
 
   if (action === 'remove-item') {
@@ -724,6 +974,7 @@ function handleCollectionClick(event) {
     refreshDirtyState();
     updateJsonEditor({ silent: true });
     renderCollections();
+    renderLivePreview();
   }
 }
 
@@ -743,6 +994,7 @@ function handleCollectionInput(event) {
   setValue(path, list);
   refreshDirtyState();
   updateJsonEditor({ silent: true });
+  renderLivePreview();
 }
 
 function parseCollectionDefault(collection) {

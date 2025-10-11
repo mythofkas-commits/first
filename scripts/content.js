@@ -517,9 +517,44 @@
       .toLowerCase();
   }
 
+  function handleIncomingMessage(event) {
+    const message = event?.data;
+    if (!message || typeof message !== 'object') return;
+    if (message.type === 'site:update' && message.data) {
+      applySiteData(message.data);
+    }
+    if (message.type === 'site:request-state') {
+      notifyParentReady();
+    }
+  }
+
+  function notifyParentReady() {
+    if (window === window.top) return;
+    try {
+      window.parent?.postMessage({ type: 'site:ready', page: getPageType() }, '*');
+    } catch (error) {
+      // noop
+    }
+  }
+
+  function getPageType() {
+    return document.body?.classList?.contains('order-page') ? 'order' : 'home';
+  }
+
+  window.SiteContent = window.SiteContent || {};
+  window.SiteContent.apply = applySiteData;
+  window.SiteContent.load = loadSiteContent;
+  window.SiteContent.state = STATE;
+
+  window.addEventListener('message', handleIncomingMessage);
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadSiteContent, { once: true });
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSiteContent();
+      notifyParentReady();
+    }, { once: true });
   } else {
     loadSiteContent();
+    notifyParentReady();
   }
 })();

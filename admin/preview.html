@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Vida Beauty Brow Admin Preview</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --preview-bg: #f8f7fc;
+      --preview-border: rgba(15, 23, 42, 0.08);
+      --preview-text: #1f2937;
+      --preview-muted: #64748b;
+      --preview-active: #7c3aed;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--preview-bg);
+      color: var(--preview-text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 1.25rem;
+      gap: 1rem;
+    }
+
+    .preview-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .preview-tabs {
+      display: inline-flex;
+      background: rgba(124, 58, 237, 0.08);
+      padding: 0.35rem;
+      border-radius: 999px;
+      border: 1px solid rgba(124, 58, 237, 0.18);
+    }
+
+    .preview-tabs button {
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--preview-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .preview-tabs button[aria-selected="true"] {
+      background: #ffffff;
+      color: var(--preview-active);
+      box-shadow: 0 12px 24px rgba(124, 58, 237, 0.15);
+    }
+
+    .preview-status {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--preview-muted);
+    }
+
+    .preview-stage {
+      position: relative;
+      flex: 1;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 24px;
+      border: 1px solid var(--preview-border);
+      box-shadow: 0 40px 120px rgba(15, 23, 42, 0.12);
+      overflow: hidden;
+    }
+
+    .preview-stage iframe {
+      width: 100%;
+      height: 100%;
+      min-height: 640px;
+      border: none;
+      background: #ffffff;
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease;
+    }
+
+    .preview-stage iframe[data-active="true"] {
+      opacity: 1;
+      visibility: visible;
+      position: relative;
+    }
+
+    .preview-cover {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      background: linear-gradient(180deg, rgba(248, 247, 252, 0.9), rgba(248, 247, 252, 0.8));
+      color: var(--preview-muted);
+      font-size: 0.95rem;
+      backdrop-filter: blur(4px);
+      transition: opacity 0.2s ease;
+    }
+
+    .preview-cover[hidden] {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .preview-region {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      background: rgba(15, 23, 42, 0.85);
+      color: #ffffff;
+      padding: 0.5rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      pointer-events: none;
+    }
+
+    .preview-spinner {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 3px solid rgba(124, 58, 237, 0.2);
+      border-top-color: var(--preview-active);
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body data-active-page="home">
+  <div class="preview-toolbar">
+    <div class="preview-tabs" role="tablist">
+      <button type="button" role="tab" aria-selected="true" data-preview-tab="home">Homepage</button>
+      <button type="button" role="tab" aria-selected="false" data-preview-tab="order">Order page</button>
+    </div>
+    <p class="preview-status" data-preview-status>Loading preview…</p>
+  </div>
+  <div class="preview-stage" data-preview-stage>
+    <iframe src="../index.html" title="Homepage preview" data-preview-pane="home" loading="lazy"></iframe>
+    <iframe src="../order.html" title="Order page preview" data-preview-pane="order" loading="lazy"></iframe>
+    <div class="preview-cover" data-preview-cover>
+      <div class="preview-spinner" aria-hidden="true"></div>
+      <p>Preparing live site…</p>
+    </div>
+    <div class="preview-region" data-preview-region hidden>
+      <span data-region-label>Site identity &amp; contact</span>
+    </div>
+  </div>
+  <script type="module" src="preview-frame.js"></script>
+</body>
+</html>
