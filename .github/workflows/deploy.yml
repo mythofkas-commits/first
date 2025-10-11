@@ -67,7 +67,7 @@ jobs:
           rm -f "$rel/data/site.json"
           ln -sfn /srv/vidabrow/shared/site.json "$rel/data/site.json"
 
-# If composer.json exists, install composer locally and run install (no root needed)
+          # If composer.json exists, install composer locally and run install (no root needed)
           if [ -f "$rel/composer.json" ]; then
             mkdir -p "$HOME/bin"
             if ! command -v "$HOME/bin/composer" >/dev/null 2>&1; then

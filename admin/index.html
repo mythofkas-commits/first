@@ -51,7 +51,7 @@
         <div class="admin-builder">
           <aside class="admin-panel" aria-label="Site controls">
             <div class="admin-panel__sections">
-              <section class="admin-card" id="overview" aria-labelledby="overview-heading">
+              <section class="admin-card" id="overview" aria-labelledby="overview-heading" data-preview-region="site.overview" tabindex="-1">
           <div class="admin-card__header">
             <h2 id="overview-heading">Administrator access</h2>
             <p>Authenticate with your admin token, then publish updates or refresh data from the server.</p>
@@ -74,7 +74,7 @@
           </div>
         </section>
 
-        <section class="admin-card" id="site-identity" aria-labelledby="site-identity-heading">
+        <section class="admin-card" id="site-identity" aria-labelledby="site-identity-heading" data-preview-region="site.identity" tabindex="-1">
           <div class="admin-card__header">
             <h2 id="site-identity-heading">Site identity &amp; contact</h2>
             <p>Control your global branding, tagline, SEO metadata, and contact information.</p>
@@ -139,7 +139,7 @@
           </div>
         </section>
 
-        <section class="admin-card" id="navigation-links" aria-labelledby="navigation-links-heading">
+        <section class="admin-card" id="navigation-links" aria-labelledby="navigation-links-heading" data-preview-region="site.navigation" tabindex="-1">
           <div class="admin-card__header">
             <h2 id="navigation-links-heading">Navigation &amp; links</h2>
             <p>Reorder or add menu items, social links, and footer content without touching JSON.</p>
@@ -231,7 +231,7 @@
           </div>
         </section>
 
-        <section class="admin-card" id="design-studio" aria-labelledby="design-studio-heading">
+        <section class="admin-card" id="design-studio" aria-labelledby="design-studio-heading" data-preview-region="design" tabindex="-1">
           <div class="admin-card__header">
             <h2 id="design-studio-heading">Design studio</h2>
             <p>Adjust theme colors, fonts, shadows, and custom CSS. Preview updates instantly.</p>
@@ -304,7 +304,7 @@
           </div>
         </section>
 
-        <section class="admin-card" id="homepage-hero" aria-labelledby="homepage-hero-heading">
+        <section class="admin-card" id="homepage-hero" aria-labelledby="homepage-hero-heading" data-preview-region="homepage.hero" tabindex="-1">
           <div class="admin-card__header">
             <h2 id="homepage-hero-heading">Homepage hero</h2>
             <p>Customize the hero copy, imagery, and CTAs shown on the homepage.</p>
@@ -357,7 +357,7 @@
           </div>
         </section>
 
-        <section class="admin-card" id="homepage-sections" aria-labelledby="homepage-sections-heading">
+        <section class="admin-card" id="homepage-sections" aria-labelledby="homepage-sections-heading" data-preview-region="homepage.sections" tabindex="-1">
           <div class="admin-card__header">
             <h2 id="homepage-sections-heading">Homepage sections</h2>
             <p>Fine-tune badges, services, experience highlights, testimonials, and contact content.</p>
@@ -605,7 +605,7 @@
           </details>
         </section>
 
-        <section class="admin-card" id="booking-services" aria-labelledby="booking-services-heading">
+        <section class="admin-card" id="booking-services" aria-labelledby="booking-services-heading" data-preview-region="order" tabindex="-1">
           <div class="admin-card__header">
             <h2 id="booking-services-heading">Booking &amp; services</h2>
             <p>Manage the booking hero, filters, services, checkout experience, and confirmation copy.</p>
@@ -747,7 +747,7 @@
             </div>
           </details>
         </section>
-        <section class="admin-card" id="integrations" aria-labelledby="integrations-heading">
+        <section class="admin-card" id="integrations" aria-labelledby="integrations-heading" data-preview-region="integrations" tabindex="-1">
           <div class="admin-card__header">
             <h2 id="integrations-heading">Integrations</h2>
             <p>Store credentials for Stripe payments and your CMS so teammates have a single source of truth.</p>
@@ -817,7 +817,7 @@
           </details>
         </section>
 
-        <section class="admin-card" id="custom-pages" aria-labelledby="custom-pages-heading">
+        <section class="admin-card" id="custom-pages" aria-labelledby="custom-pages-heading" data-preview-region="pages" tabindex="-1">
           <div class="admin-card__header">
             <h2 id="custom-pages-heading">Custom pages</h2>
             <p>Create or edit fully custom pages served at <code>/pages/&lt;slug&gt;</code>. Content supports HTML.</p>
@@ -828,7 +828,7 @@
           </label>
         </section>
 
-        <section class="admin-card" id="advanced-json" aria-labelledby="json-heading">
+        <section class="admin-card" id="advanced-json" aria-labelledby="json-heading" data-preview-region="advanced" tabindex="-1">
           <div class="admin-card__header">
             <h2 id="json-heading">Advanced JSON editor</h2>
             <p>Edit the entire configuration directly. Formatting tools help keep the JSON valid.</p>
@@ -845,31 +845,28 @@
           </aside>
 
           <section class="admin-stage" aria-label="Live preview and guidance">
-            <div class="admin-stage__canvas" id="design-mockup">
-              <header class="admin-stage__header">
-                <h3>Live design canvas</h3>
-                <p>Color, typography, and surface tweaks instantly refresh this preview.</p>
-              </header>
-              <div class="admin-mockup" role="presentation">
-                <div class="admin-mockup__nav"></div>
-                <div class="admin-mockup__hero">
-                  <div class="admin-mockup__content">
-                    <span class="admin-mockup__eyebrow">Brow studio</span>
-                    <h4>Signature results</h4>
-                    <p>See how your palette, fonts, and surfaces come together for guests.</p>
-                    <div class="admin-mockup__buttons">
-                      <span class="admin-mockup__btn admin-mockup__btn--primary">Primary</span>
-                      <span class="admin-mockup__btn admin-mockup__btn--ghost">Ghost</span>
-                    </div>
-                  </div>
-                  <div class="admin-mockup__card">
-                    <div class="admin-mockup__chip"></div>
-                    <div class="admin-mockup__chip admin-mockup__chip--muted"></div>
-                    <div class="admin-mockup__chip admin-mockup__chip--accent"></div>
-                  </div>
+            <div class="admin-stage__canvas admin-live" id="design-mockup">
+              <header class="admin-live__header">
+                <div>
+                  <h3>Live site preview</h3>
+                  <p id="preview-status">See changes as you edit panels on the left.</p>
                 </div>
+                <div class="admin-live__actions" role="group" aria-label="Preview viewport controls">
+                  <button type="button" class="admin-chip" data-preview-scale="desktop">Desktop</button>
+                  <button type="button" class="admin-chip" data-preview-scale="tablet">Tablet</button>
+                  <button type="button" class="admin-chip" data-preview-scale="mobile">Mobile</button>
+                </div>
+              </header>
+              <div class="admin-live__viewport" data-preview-viewport>
+                <div class="admin-live__frame" id="live-preview" tabindex="0" aria-live="polite"></div>
               </div>
-              <div class="admin-preview" id="design-preview" aria-live="polite"></div>
+              <section class="admin-live__tokens" aria-label="Design tokens">
+                <header>
+                  <h4>Design tokens</h4>
+                  <p>Color palettes and fonts update instantly from the design studio.</p>
+                </header>
+                <div class="admin-preview" id="design-preview" aria-live="polite"></div>
+              </section>
             </div>
 
             <div class="admin-stage__panel">
