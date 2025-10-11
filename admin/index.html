@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Vida Beauty Brow Admin Panel</title>
-  <link rel="stylesheet" href="../styles/admin.css">
+  <link rel="stylesheet" href="../styles/admin.css?v=2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -48,7 +48,10 @@
       </header>
 
       <main class="admin-main">
-        <section class="admin-card" id="overview" aria-labelledby="overview-heading">
+        <div class="admin-builder">
+          <aside class="admin-panel" aria-label="Site controls">
+            <div class="admin-panel__sections">
+              <section class="admin-card" id="overview" aria-labelledby="overview-heading">
           <div class="admin-card__header">
             <h2 id="overview-heading">Administrator access</h2>
             <p>Authenticate with your admin token, then publish updates or refresh data from the server.</p>
@@ -299,7 +302,6 @@
               <textarea data-path="design.customCss" rows="4" placeholder=":root { --color-primary: #000; }"></textarea>
             </label>
           </div>
-          <div class="admin-preview" id="design-preview" aria-live="polite"></div>
         </section>
 
         <section class="admin-card" id="homepage-hero" aria-labelledby="homepage-hero-heading">
@@ -839,6 +841,47 @@
           </div>
           <p id="json-status" class="admin-status" role="status" aria-live="polite"></p>
         </section>
+            </div>
+          </aside>
+
+          <section class="admin-stage" aria-label="Live preview and guidance">
+            <div class="admin-stage__canvas" id="design-mockup">
+              <header class="admin-stage__header">
+                <h3>Live design canvas</h3>
+                <p>Color, typography, and surface tweaks instantly refresh this preview.</p>
+              </header>
+              <div class="admin-mockup" role="presentation">
+                <div class="admin-mockup__nav"></div>
+                <div class="admin-mockup__hero">
+                  <div class="admin-mockup__content">
+                    <span class="admin-mockup__eyebrow">Brow studio</span>
+                    <h4>Signature results</h4>
+                    <p>See how your palette, fonts, and surfaces come together for guests.</p>
+                    <div class="admin-mockup__buttons">
+                      <span class="admin-mockup__btn admin-mockup__btn--primary">Primary</span>
+                      <span class="admin-mockup__btn admin-mockup__btn--ghost">Ghost</span>
+                    </div>
+                  </div>
+                  <div class="admin-mockup__card">
+                    <div class="admin-mockup__chip"></div>
+                    <div class="admin-mockup__chip admin-mockup__chip--muted"></div>
+                    <div class="admin-mockup__chip admin-mockup__chip--accent"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="admin-preview" id="design-preview" aria-live="polite"></div>
+            </div>
+
+            <div class="admin-stage__panel">
+              <h3>Quick actions</h3>
+              <ul>
+                <li>Use the reset buttons on any field to snap back to the last saved value.</li>
+                <li>Collections let you add, remove, and reorder repeatable content.</li>
+                <li>Publish changes to push the configuration to the live storefront.</li>
+              </ul>
+            </div>
+          </section>
+        </div>
       </main>
 
       <footer class="admin-footer">
@@ -847,6 +890,6 @@
     </div>
   </div>
 
-  <script type="module" src="admin.js"></script>
+  <script type="module" src="admin.js?v=2"></script>
 </body>
 </html>
