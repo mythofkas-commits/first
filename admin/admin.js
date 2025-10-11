@@ -182,6 +182,8 @@ const state = {
   dirty: false,
   saving: false,
   publishLabel: 'Publish changes',
+  activePreviewRegion: 'site.identity',
+  previewScale: localStorage.getItem('adminPreviewScale') || 'desktop',
 };
 
 const elements = {
@@ -195,12 +197,31 @@ const elements = {
   unsavedIndicator: document.getElementById('unsaved-indicator'),
   designPreview: document.getElementById('design-preview'),
   designMockup: document.getElementById('design-mockup'),
+  livePreview: document.getElementById('live-preview'),
+  previewViewport: document.querySelector('[data-preview-viewport]'),
+  previewStatus: document.getElementById('preview-status'),
+  previewScaleButtons: Array.from(document.querySelectorAll('[data-preview-scale]')),
   jsonEditor: document.getElementById('json-editor'),
   jsonStatus: document.getElementById('json-status'),
   formatJson: document.getElementById('format-json'),
   resetJson: document.getElementById('reset-json'),
   saveJson: document.getElementById('save-json'),
 };
+
+const PREVIEW_REGION_LABELS = {
+  'site.overview': 'Administrator access',
+  'site.identity': 'Site identity & contact',
+  'site.navigation': 'Navigation & links',
+  design: 'Design studio',
+  'homepage.hero': 'Homepage hero',
+  'homepage.sections': 'Homepage sections',
+  order: 'Booking & services',
+  integrations: 'Integrations',
+  pages: 'Custom pages',
+  advanced: 'Advanced JSON editor',
+};
+
+const PREVIEW_SCALES = ['desktop', 'tablet', 'mobile'];
 
 let sectionObserver;
 
@@ -240,6 +261,361 @@ function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function previewText(value, placeholder) {
+  if (value === null || value === undefined) {
+    return `<span class="admin-live__placeholder">${escapeHtml(placeholder)}</span>`;
+  }
+  const normalized = typeof value === 'string' ? value.trim() : value;
+  if (typeof normalized === 'number') {
+    return escapeHtml(String(normalized));
+  }
+  if (typeof normalized === 'string' && normalized) {
+    return escapeHtml(normalized);
+  }
+  return `<span class="admin-live__placeholder">${escapeHtml(placeholder)}</span>`;
+}
+
+function countSummary(items, noun) {
+  const list = Array.isArray(items) ? items : [];
+  const count = list.length;
+  if (!count) {
+    return `<span class="admin-live__placeholder">Add ${escapeHtml(noun)}</span>`;
+  }
+  const plural = count === 1 ? noun : `${noun}s`;
+  return `<strong>${count}</strong> ${escapeHtml(plural)}`;
+}
+
+function escapeSelector(value) {
+  if (typeof value !== 'string') return '';
+  if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+    return CSS.escape(value);
+  }
+  return value.replace(/([\\ #;?%&,.+*~':"!^$\[\]()=>|\/])/g, '\\$1');
+}
+
+function renderLivePreview() {
+  if (!elements.livePreview) return;
+  const data = state.data || getDefaultData();
+  const site = data.site || {};
+  const homepage = data.homepage || {};
+  const orderPage = data.orderPage || {};
+  const integrations = data.integrations || {};
+  const pages = Array.isArray(data.pages) ? data.pages : [];
+  const designFonts = (data.design && data.design.fonts) || {};
+
+  const siteContact = site.contact || {};
+  const siteCta = site.cta || {};
+  const hero = homepage.hero || {};
+  const services = homepage.services || {};
+  const experience = homepage.experience || {};
+  const results = homepage.results || {};
+  const reviews = homepage.reviews || {};
+  const ctaBanner = homepage.ctaBanner || {};
+  const contactSection = homepage.contact || {};
+  const orderHero = orderPage.hero || {};
+  const checkout = orderPage.checkout || {};
+
+  const navItems = Array.isArray(site.navigation) ? site.navigation.slice(0, 6) : [];
+  const navList = navItems.length
+    ? navItems
+        .map((item, index) => `<li>${previewText(item?.label, `Menu item ${index + 1}`)}</li>`)
+        .join('')
+    : '<li class="admin-live__empty">Add navigation links</li>';
+
+  const socialCount = Array.isArray(site.social) ? site.social.length : 0;
+  const socialSummary = socialCount
+    ? `<p class="admin-live__meta"><strong>${socialCount}</strong> social link${socialCount === 1 ? '' : 's'} configured</p>`
+    : '<p class="admin-live__meta admin-live__meta--muted">No social links yet</p>';
+
+  const footerDescription = previewText(site.footer?.description, 'Footer description appears here');
+
+  const serviceCards = Array.isArray(services.cards) ? services.cards.slice(0, 3) : [];
+  const servicesList = serviceCards.length
+    ? serviceCards
+        .map((card, index) => `<li>${previewText(card?.title || card?.label, `Service ${index + 1}`)}</li>`)
+        .join('')
+    : '<li class="admin-live__empty">Add service cards</li>';
+
+  const experienceHighlights = Array.isArray(experience.highlights) ? experience.highlights.slice(0, 3) : [];
+  const experienceList = experienceHighlights.length
+    ? experienceHighlights
+        .map((item, index) => {
+          if (typeof item === 'string') {
+            return `<li>${previewText(item, `Highlight ${index + 1}`)}</li>`;
+          }
+          return `<li>${previewText(item?.title, `Highlight ${index + 1}`)}</li>`;
+        })
+        .join('')
+    : '<li class="admin-live__empty">Add experience highlights</li>';
+
+  const galleryCount = Array.isArray(results.gallery) ? results.gallery.length : 0;
+  const testimonials = Array.isArray(reviews.testimonials) ? reviews.testimonials : [];
+  const primaryTestimonial = testimonials[0];
+  const testimonialHtml = primaryTestimonial
+    ? `<p class="admin-live__blockquote">“${previewText(primaryTestimonial.quote, 'Testimonial quote')}”<strong>${previewText(primaryTestimonial.name, 'Client name')}</strong></p>`
+    : '<p class="admin-live__meta admin-live__meta--muted">Add testimonials to highlight guest feedback.</p>';
+
+  const filterCount = Array.isArray(orderPage.filters) ? orderPage.filters.length : 0;
+  const menuCount = Array.isArray(orderPage.serviceMenu) ? orderPage.serviceMenu.length : 0;
+  const stripe = integrations.stripe || {};
+  const cms = integrations.cms || {};
+
+  elements.livePreview.innerHTML = `
+    <div class="admin-live__block" data-preview-block="site.overview" data-preview-primary="site.overview" tabindex="0">
+      <span class="admin-live__label">Admin workflow</span>
+      <p class="admin-live__stage-note">Use your secure admin token to publish updates to the live storefront.</p>
+      <div class="admin-live__toolbar">
+        <span><strong>${previewText(site.name, 'Your brand')}</strong> is in editing mode.</span>
+        <span>Unsaved changes stay local until you press <strong>Publish changes</strong>.</span>
+        <span>Configuration lives in <code>data/site.json</code>.</span>
+      </div>
+    </div>
+
+    <div class="admin-live__block" data-preview-block="site.identity site.navigation" data-preview-primary="site.identity" tabindex="0">
+      <span class="admin-live__label">Brand & navigation</span>
+      <h4 class="admin-live__heading">${previewText(site.name, 'Business name')}</h4>
+      <p class="admin-live__muted">${previewText(site.tagline, 'Tagline appears here to set the tone')}</p>
+      <div class="admin-live__buttons">
+        <span class="admin-live__button admin-live__button--primary">${previewText(siteCta.label, 'Primary CTA')}</span>
+        <span class="admin-live__button">${previewText(siteCta.href, 'Destination link')}</span>
+      </div>
+      <div class="admin-live__contact">
+        <span><strong>${previewText(siteContact.phoneDisplay || siteContact.phone, 'Phone number')}</strong></span>
+        <span>${previewText(siteContact.email, 'Email address')}</span>
+        <span>${previewText(siteContact.address, 'Studio address')}</span>
+        <span>${previewText(siteContact.hours, 'Business hours')}</span>
+      </div>
+      <ul class="admin-live__nav">${navList}</ul>
+      ${socialSummary}
+      <p class="admin-live__meta">${footerDescription}</p>
+    </div>
+
+    <div class="admin-live__block" data-preview-block="design" data-preview-primary="design" tabindex="0">
+      <span class="admin-live__label">Design system</span>
+      <p class="admin-live__summary">Custom CSS, typography, and colors cascade across this preview canvas.</p>
+      <p class="admin-live__meta">Heading font: <strong>${previewText(designFonts.heading, 'Heading font')}</strong> • Body font: <strong>${previewText(designFonts.body, 'Body font')}</strong></p>
+      <p class="admin-live__meta">Shadows, gradients, and radii render automatically as you tweak tokens.</p>
+    </div>
+
+    <div class="admin-live__block" data-preview-block="homepage.hero" data-preview-primary="homepage.hero" tabindex="0">
+      <span class="admin-live__label">Homepage hero</span>
+      <span class="admin-live__eyebrow">${previewText(hero.eyebrow, 'Hero eyebrow')}</span>
+      <h4 class="admin-live__heading">${previewText(hero.title, 'Hero headline')}</h4>
+      <p class="admin-live__muted">${previewText(hero.description, 'Tell guests what makes your studio special')}</p>
+      <p class="admin-live__meta">Rating: <strong>${previewText(hero.rating?.score, 'Score')}</strong> • ${previewText(hero.rating?.details, 'Explain the rating source')}</p>
+      <div class="admin-live__buttons">
+        <span class="admin-live__button admin-live__button--primary">${previewText(hero.primaryCta?.label, 'Primary action')}</span>
+        <span class="admin-live__button">${previewText(hero.secondaryCta?.label, 'Secondary action')}</span>
+      </div>
+      <p class="admin-live__status">Image: ${previewText(hero.image?.alt || hero.image?.src, 'Describe or link the hero image')}</p>
+    </div>
+
+    <div class="admin-live__block" data-preview-block="homepage.sections" data-preview-primary="homepage.sections" tabindex="0">
+      <span class="admin-live__label">Homepage sections</span>
+      <div class="admin-live__grid">
+        <div class="admin-live__card">
+          <h5>${previewText(services.title, 'Services title')}</h5>
+          <p class="admin-live__summary">${previewText(services.description, 'Introduce your core offerings')}</p>
+          <ul class="admin-live__list">${servicesList}</ul>
+        </div>
+        <div class="admin-live__card">
+          <h5>${previewText(experience.title, 'Experience title')}</h5>
+          <p class="admin-live__summary">${previewText(experience.description, 'Share the studio experience')}</p>
+          <ul class="admin-live__list">${experienceList}</ul>
+          <p class="admin-live__meta">CTA: <strong>${previewText(experience.cta?.label, 'Button label')}</strong> → ${previewText(experience.cta?.href, 'Link')}</p>
+        </div>
+        <div class="admin-live__card">
+          <h5>${previewText(results.title, 'Results title')}</h5>
+          <p class="admin-live__summary">${previewText(results.description, 'Describe the transformations you deliver')}</p>
+          <p class="admin-live__meta">${galleryCount ? `<strong>${galleryCount}</strong> gallery item${galleryCount === 1 ? '' : 's'} configured` : '<span class="admin-live__placeholder">Add gallery items</span>'}</p>
+        </div>
+        <div class="admin-live__card">
+          <h5>${previewText(reviews.title, 'Reviews title')}</h5>
+          <p class="admin-live__summary">${previewText(reviews.description, 'Summarize your social proof')}</p>
+          ${testimonialHtml}
+        </div>
+        <div class="admin-live__card">
+          <h5>${previewText(ctaBanner.title, 'CTA banner title')}</h5>
+          <p class="admin-live__summary">${previewText(ctaBanner.description, 'Motivate visitors to take action')}</p>
+          <span class="admin-live__button admin-live__button--primary">${previewText(ctaBanner.cta?.label, 'Banner CTA')}</span>
+        </div>
+        <div class="admin-live__card">
+          <h5>${previewText(contactSection.title, 'Contact title')}</h5>
+          <p class="admin-live__summary">${previewText(contactSection.description, 'Explain how to get in touch')}</p>
+          <p class="admin-live__meta">${countSummary(contactSection.details, 'contact detail')}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-live__block" data-preview-block="order" data-preview-primary="order" tabindex="0">
+      <span class="admin-live__label">Booking & services</span>
+      <h4 class="admin-live__heading">${previewText(orderHero.title, 'Order page headline')}</h4>
+      <p class="admin-live__muted">${previewText(orderHero.description, 'Set expectations for online booking')}</p>
+      <p class="admin-live__meta">Hours: ${previewText(orderHero.hours, 'Add availability or pickup times')}</p>
+      <p class="admin-live__meta">Filters: ${filterCount ? `<strong>${filterCount}</strong> configured` : '<span class="admin-live__placeholder">Add filters</span>'} • Service groups: ${menuCount ? `<strong>${menuCount}</strong>` : '<span class="admin-live__placeholder">Add service groups</span>'}</p>
+      <p class="admin-live__summary">Checkout mode: <strong>${escapeHtml(checkout.mode || 'form')}</strong> • ${previewText(checkout.instructions, 'Explain the booking flow')}</p>
+      <p class="admin-live__meta">Stripe: ${stripe.enabled ? '<strong>Enabled</strong>' : '<span class="admin-live__placeholder">Disabled</span>'} • CMS sync: ${cms.enabled ? '<strong>Enabled</strong>' : '<span class="admin-live__placeholder">Disabled</span>'}</p>
+    </div>
+
+    <div class="admin-live__block" data-preview-block="integrations" data-preview-primary="integrations" tabindex="0">
+      <span class="admin-live__label">Integrations</span>
+      <p class="admin-live__summary">Connect Stripe, your CMS, and other services so the storefront stays in sync.</p>
+      <p class="admin-live__meta">Stripe dashboard: ${previewText(stripe.dashboardUrl, 'Link to Stripe dashboard')}</p>
+      <p class="admin-live__meta">CMS provider: ${previewText(cms.provider, 'Provider name')} • Preview URL: ${previewText(cms.previewUrl, 'Preview URL')}</p>
+      <p class="admin-live__meta">Notes: ${previewText(cms.notes || stripe.notes, 'Document integration steps')}</p>
+    </div>
+
+    <div class="admin-live__block" data-preview-block="pages" data-preview-primary="pages" tabindex="0">
+      <span class="admin-live__label">Custom pages</span>
+      <p class="admin-live__summary">${countSummary(pages, 'custom page')} ready to publish.</p>
+      <p class="admin-live__meta">Define slugs, heroes, and HTML sections without leaving the builder.</p>
+    </div>
+
+    <div class="admin-live__block" data-preview-block="advanced" data-preview-primary="advanced" tabindex="0">
+      <span class="admin-live__label">Advanced JSON</span>
+      <p class="admin-live__summary">Power users can edit the raw configuration for edge cases.</p>
+      <p class="admin-live__meta">Format, reset, or paste structured data directly into the editor.</p>
+    </div>
+  `;
+
+  const region = state.activePreviewRegion || 'site.identity';
+  highlightPreviewRegion(region, { persist: true });
+}
+
+function highlightPreviewRegion(region, options = {}) {
+  if (!elements.livePreview) return;
+  const { persist = false, preserveStatus = false } = options;
+  const blocks = elements.livePreview.querySelectorAll('[data-preview-block]');
+  let matched = false;
+  blocks.forEach((block) => {
+    const tokens = String(block.dataset.previewBlock || '')
+      .split(/\s+/)
+      .filter(Boolean);
+    const isActive = region && tokens.some((token) => token === region);
+    block.classList.toggle('admin-live__block--active', isActive);
+    block.setAttribute('aria-current', isActive ? 'true' : 'false');
+    if (isActive && !matched) {
+      matched = true;
+    }
+  });
+  if (persist && region) {
+    state.activePreviewRegion = region;
+  }
+  if (elements.previewStatus && !preserveStatus) {
+    const label = PREVIEW_REGION_LABELS[region] || 'Live site preview';
+    elements.previewStatus.textContent = label;
+  }
+  if (!matched && region && persist) {
+    state.activePreviewRegion = region;
+  }
+}
+
+function findSectionForRegion(region) {
+  if (!region) return null;
+  const selector = escapeSelector(region);
+  if (!selector) return null;
+  return document.querySelector(`.admin-card[data-preview-region="${selector}"]`);
+}
+
+function focusPreviewRegion(region) {
+  const target = findSectionForRegion(region);
+  if (!target) return;
+  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  requestAnimationFrame(() => {
+    target.focus({ preventScroll: true });
+  });
+}
+
+function setupPreviewInteractions() {
+  const sections = document.querySelectorAll('.admin-card[data-preview-region]');
+  sections.forEach((section) => {
+    section.addEventListener('focusin', () => {
+      const region = section.dataset.previewRegion;
+      if (region) {
+        highlightPreviewRegion(region, { persist: true });
+      }
+    });
+    section.addEventListener('mouseenter', () => {
+      const region = section.dataset.previewRegion;
+      if (region) {
+        highlightPreviewRegion(region, { persist: false });
+      }
+    });
+    section.addEventListener('mouseleave', () => {
+      if (state.activePreviewRegion) {
+        highlightPreviewRegion(state.activePreviewRegion, { persist: true });
+      }
+    });
+  });
+
+  if (!elements.livePreview) return;
+
+  elements.livePreview.addEventListener('mouseover', (event) => {
+    const block = event.target.closest('[data-preview-block]');
+    if (!block) return;
+    const region = block.dataset.previewPrimary || (block.dataset.previewBlock || '').split(/\s+/)[0];
+    if (region) {
+      highlightPreviewRegion(region, { persist: false });
+    }
+  });
+
+  elements.livePreview.addEventListener('focusin', (event) => {
+    const block = event.target.closest('[data-preview-block]');
+    if (!block) return;
+    const region = block.dataset.previewPrimary || (block.dataset.previewBlock || '').split(/\s+/)[0];
+    if (region) {
+      highlightPreviewRegion(region, { persist: true });
+    }
+  });
+
+  elements.livePreview.addEventListener('mouseleave', () => {
+    if (state.activePreviewRegion) {
+      highlightPreviewRegion(state.activePreviewRegion, { persist: true });
+    }
+  });
+
+  elements.livePreview.addEventListener('click', (event) => {
+    const block = event.target.closest('[data-preview-block]');
+    if (!block) return;
+    const region = block.dataset.previewPrimary || (block.dataset.previewBlock || '').split(/\s+/)[0];
+    if (region) {
+      highlightPreviewRegion(region, { persist: true });
+      focusPreviewRegion(region);
+    }
+  });
+
+  elements.livePreview.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    const block = event.target.closest('[data-preview-block]');
+    if (!block) return;
+    event.preventDefault();
+    block.click();
+  });
+}
+
+function setPreviewScale(scale, options = {}) {
+  if (!elements.previewViewport) return;
+  const nextScale = PREVIEW_SCALES.includes(scale) ? scale : 'desktop';
+  elements.previewViewport.dataset.scale = nextScale;
+  elements.previewScaleButtons?.forEach((button) => {
+    const isActive = button.dataset.previewScale === nextScale;
+    button.dataset.active = isActive ? 'true' : 'false';
+    button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
+  if (options.persist !== false) {
+    state.previewScale = nextScale;
+    localStorage.setItem('adminPreviewScale', nextScale);
+  }
+}
 function enhanceFields() {
   document.querySelectorAll('[data-path]').forEach((field) => {
     if (!field || field.dataset.enhanced === 'true') {
@@ -293,6 +669,8 @@ async function init() {
   attachEventListeners();
   setupCollections();
   setupSectionObserver();
+  setupPreviewInteractions();
+  setPreviewScale(state.previewScale || 'desktop', { persist: false });
   await loadContent();
 }
 
@@ -337,6 +715,13 @@ function attachEventListeners() {
   fields.forEach((field) => {
     field.addEventListener('input', (event) => handleFieldChange(event.target));
     field.addEventListener('change', (event) => handleFieldChange(event.target));
+  });
+
+  elements.previewScaleButtons?.forEach((button) => {
+    button.addEventListener('click', () => {
+      const scale = button.dataset.previewScale || 'desktop';
+      setPreviewScale(scale);
+    });
   });
 
   elements.jsonEditor?.addEventListener('input', () => {
@@ -408,6 +793,11 @@ function setActiveSection(id) {
       link.removeAttribute('aria-current');
     }
   });
+  const section = document.getElementById(id);
+  const region = section?.dataset?.previewRegion;
+  if (region) {
+    highlightPreviewRegion(region, { persist: true });
+  }
 }
 
 async function loadContent() {
@@ -489,6 +879,7 @@ function populateForm() {
   renderCollections();
   updateDesignPreview();
   updateJsonEditor();
+  renderLivePreview();
 }
 
 function resetField(field) {
@@ -644,6 +1035,7 @@ function handleFieldChange(field) {
   if (path.startsWith('design.colors') || path.startsWith('design.fonts') || path.startsWith('design.customCss')) {
     updateDesignPreview();
   }
+  renderLivePreview();
 }
 
 function renderCollections() {
@@ -712,6 +1104,7 @@ function handleCollectionClick(event) {
     refreshDirtyState();
     updateJsonEditor({ silent: true });
     renderCollections();
+    renderLivePreview();
   }
 
   if (action === 'remove-item') {
@@ -724,6 +1117,7 @@ function handleCollectionClick(event) {
     refreshDirtyState();
     updateJsonEditor({ silent: true });
     renderCollections();
+    renderLivePreview();
   }
 }
 
@@ -743,6 +1137,7 @@ function handleCollectionInput(event) {
   setValue(path, list);
   refreshDirtyState();
   updateJsonEditor({ silent: true });
+  renderLivePreview();
 }
 
 function parseCollectionDefault(collection) {
