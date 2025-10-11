@@ -500,7 +500,7 @@ function highlightPreviewRegion(region, options = {}) {
     const tokens = String(block.dataset.previewBlock || '')
       .split(/\s+/)
       .filter(Boolean);
-    const isActive = region && tokens.some((token) => token === region || token.startsWith(region) || region.startsWith(token));
+    const isActive = region && tokens.some((token) => token === region);
     block.classList.toggle('admin-live__block--active', isActive);
     block.setAttribute('aria-current', isActive ? 'true' : 'false');
     if (isActive && !matched) {
