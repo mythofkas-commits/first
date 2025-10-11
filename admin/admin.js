@@ -896,7 +896,8 @@ function setValue(path, value) {
     }
     target = target[segment];
   });
-  target[segments.at(-1)] = value;
+  const last = segments[segments.length - 1];
+  target[last] = value;
 }
 
 function setDeepValue(target, path, value) {
@@ -909,7 +910,8 @@ function setDeepValue(target, path, value) {
     }
     current = current[segment];
   });
-  current[segments.at(-1)] = value;
+  const last = segments[segments.length - 1];
+  current[last] = value;
 }
 
 async function saveFromJsonEditor() {
