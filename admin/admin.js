@@ -461,7 +461,7 @@ function applyData(data, options = {}) {
   const snapshotSource = options.snapshotSource && isPlainObject(options.snapshotSource)
     ? options.snapshotSource
     : (isPlainObject(data) ? data : merged);
-  state.snapshot = JSON.stringify(snapshotSource);
+  state.snapshot = JSON.stringify(clone(snapshotSource));
   populateForm();
   setDirty(false);
 }
@@ -968,12 +968,7 @@ function restoreSnapshot() {
   const confirmed = confirm('Reset all unsaved changes?');
   if (!confirmed) return;
   try {
-    let snapshot;
-    if (typeof state.snapshot === 'string') {
-      snapshot = clone(JSON.parse(state.snapshot));
-    } else {
-      snapshot = clone(state.snapshot);
-    }
+    const snapshot = clone(state.snapshot);
     applyData(snapshot, { snapshotSource: state.snapshot });
     if (elements.jsonStatus) {
       elements.jsonStatus.textContent = 'Changes reverted to last saved version.';
